@@ -4,165 +4,192 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cn.com.luckytry.interview.MainActivity">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="cn.com.luckytry.interview.main.MainActivity"
+    android:gravity="center"
+    tools:showIn="@layout/app_bar_test">
 
 
-    <LinearLayout
+
+    <RelativeLayout
+        android:id="@+id/rl_rl_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:background="@color/colorAccent"
+        android:gravity="center">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="-10dp"/>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="正在拼命加载数据" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/rl_ll_mian"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            android:orientation="vertical"
             android:background="#cdcdcd"
+            android:orientation="vertical"
             android:paddingRight="5dp">
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
+
             <TextView
                 android:id="@+id/tv1"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
-                android:enabled="false"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="0"
+                android:enabled="false"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第一卷"/>
+                android:tag="0"
+                android:text="第一卷"
+                android:textColor="@drawable/part_textcolor_bg" />
 
             <!--<CheckedTextView-->
-                <!--android:id="@+id/checkedTextView"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="24dp"-->
-                <!--android:gravity="center"-->
-                <!--android:background="@drawable/part_bg"-->
-                <!--android:checked="true"-->
-                <!--android:text="第一卷" />-->
+            <!--android:id="@+id/checkedTextView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="24dp"-->
+            <!--android:gravity="center"-->
+            <!--android:background="@drawable/part_bg"-->
+            <!--android:checked="true"-->
+            <!--android:text="第一卷" />-->
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
+
             <TextView
                 android:id="@+id/tv2"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="1"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第二卷"/>
+                android:tag="1"
+                android:text="第二卷"
+                android:textColor="@drawable/part_textcolor_bg" />
+
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
 
             <TextView
                 android:id="@+id/tv3"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="2"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第三卷"/>
+                android:tag="2"
+                android:text="第三卷"
+                android:textColor="@drawable/part_textcolor_bg" />
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
 
             <TextView
                 android:id="@+id/tv4"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="3"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第四卷"/>
+                android:tag="3"
+                android:text="第四卷"
+                android:textColor="@drawable/part_textcolor_bg" />
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
 
             <TextView
                 android:id="@+id/tv5"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="4"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第五卷"/>
+                android:tag="4"
+                android:text="第五卷"
+                android:textColor="@drawable/part_textcolor_bg" />
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
 
             <TextView
                 android:id="@+id/tv6"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="5"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第六卷"/>
+                android:tag="5"
+                android:text="第六卷"
+                android:textColor="@drawable/part_textcolor_bg" />
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
 
             <TextView
                 android:id="@+id/tv7"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_weight="1"
                 android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
-                android:tag="6"
+                android:gravity="center"
                 android:onClick="doClick"
-                android:text="第七卷"/>
+                android:tag="6"
+                android:text="第七卷"
+                android:textColor="@drawable/part_textcolor_bg" />
+
             <View
                 android:layout_width="1dp"
-                android:layout_height="5dp"
-                />
+                android:layout_height="5dp" />
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView

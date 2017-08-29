@@ -19,17 +19,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:contentScrim="#A7DCE0"
+            app:contentScrim="@color/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed|enterAlways">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/image_view"
+                android:id="@+id/tv_name"
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 android:scrollbarStyle="insideInset"
                 android:text="Android 基础知识"
+                android:textColor="#444444"
                 android:textStyle="bold"
                 android:textSize="22sp"
                 android:gravity="center"
@@ -41,7 +42,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:background="@color/toolbarcolor"/>
+                app:background="@color/colorPrimaryDark"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -61,9 +62,10 @@
             android:scrollbarFadeDuration="1"
             android:fadeScrollbars="true">
 
-            <WebView
+            <cn.com.luckytry.interview.view.ShowTextWebView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:visibility="invisible"
                 android:id="@+id/web_view" />
 
         </android.support.v4.widget.NestedScrollView>
@@ -71,4 +73,3 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.support.design.widget.CoordinatorLayout>
-
