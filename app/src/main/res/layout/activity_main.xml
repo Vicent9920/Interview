@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="cn.com.luckytry.interview.MainActivity">
+    android:layout_height="match_parent">
 
 
     <LinearLayout
@@ -20,148 +19,77 @@
             android:background="#cdcdcd"
             android:paddingRight="5dp">
 
+
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
             <TextView
                 android:id="@+id/tv1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:enabled="false"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="0"
-                android:onClick="doClick"
                 android:text="第一卷"/>
 
-            <!--<CheckedTextView-->
-                <!--android:id="@+id/checkedTextView"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="24dp"-->
-                <!--android:gravity="center"-->
-                <!--android:background="@drawable/part_bg"-->
-                <!--android:checked="true"-->
-                <!--android:text="第一卷" />-->
+
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
             <TextView
                 android:id="@+id/tv2"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="1"
-                android:onClick="doClick"
                 android:text="第二卷"/>
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
 
             <TextView
                 android:id="@+id/tv3"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="2"
-                android:onClick="doClick"
                 android:text="第三卷"/>
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
 
             <TextView
                 android:id="@+id/tv4"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="3"
-                android:onClick="doClick"
                 android:text="第四卷"/>
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
 
             <TextView
                 android:id="@+id/tv5"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="4"
-                android:onClick="doClick"
                 android:text="第五卷"/>
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
 
             <TextView
                 android:id="@+id/tv6"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="5"
-                android:onClick="doClick"
                 android:text="第六卷"/>
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
 
             <TextView
                 android:id="@+id/tv7"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:background="@drawable/part_selected_bg"
-                android:textColor="@drawable/part_textcolor_bg"
+                style="@style/PartView"
                 android:tag="6"
-                android:onClick="doClick"
                 android:text="第七卷"/>
             <View
-                android:layout_width="1dp"
-                android:layout_height="5dp"
+                style="@style/ViewStub"
                 />
         </LinearLayout>
 

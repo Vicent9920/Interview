@@ -6,17 +6,22 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import cn.com.luckytry.interview.MyApplication;
 import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
+import cn.com.luckytry.interview.util.NetUtil;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
 /**
@@ -29,6 +34,7 @@ public class ShowTextWebView extends WebView{
     private Context context;
     private boolean isLoad = true;
     private onResultCall listener;
+    private boolean isJianShu = false;
 
     public ShowTextWebView(Context context) {
         super(context);
@@ -112,11 +118,19 @@ public class ShowTextWebView extends WebView{
                                 }
                             });
                         }
-                    },1000);
+                    },0000);
 
                     isLoad = false;
                 }
 
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if(!NetUtil.isConnected(MyApplication.getContext())){
+                    Toast.makeText(MyApplication.getContext(),"请检查网络",Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -153,8 +167,18 @@ public class ShowTextWebView extends WebView{
         }
     }
 
+    /**
+     * 修改标志位，直接加载内容不再获取网页文本
+     */
     public void isShowSource(){
         isLoad = false;
+    }
+
+    /**
+     * 修改标志位，简书网页爬去因素不一样
+     */
+    public void isJianShu(){
+        isJianShu = true;
     }
 
     private class InJavaScriptLocalObj {
@@ -166,9 +190,18 @@ public class ShowTextWebView extends WebView{
         @android.webkit.JavascriptInterface
         public void showSource(String html) {
 
+            LUtil.e("showSource:"+html);
             try {
                 Document doc = Jsoup.parse(html);
-                loadValue(doc.getElementsByTag("article").html());
+
+                if(isJianShu){
+//                    html = doc.getElementsByClass("content").html();
+                    html = doc.select("div.content").first().html();
+                }else{
+                    html = doc.getElementsByTag("article").html();
+                }
+                html = html.trim();
+                loadValue(html);
             } catch (Exception e) {
                 LUtil.e(TAG,"showSourceException",e);
             }

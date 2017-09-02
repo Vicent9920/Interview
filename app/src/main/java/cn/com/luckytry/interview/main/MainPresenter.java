@@ -52,7 +52,6 @@ public class MainPresenter implements MainContract.Presenter{
                 mView.showLoading(mView.getContext().getString(R.string.main_loaderror));
             }
         }else{
-            LUtil.e("size:"+data.size());
             mView.showResult();
         }
         for (int i = 0; i < 7; i++) {
@@ -108,9 +107,13 @@ public class MainPresenter implements MainContract.Presenter{
             ArrayList<Element> tag = part.select(".packge");
             for (Element element:tag) {
                 Element tagP = element.getElementsByTag("p").first();
-                if(tagP==null){
-                    InterviewBean interviewBean = new InterviewBean();
+
+                if(tagP==null ){
                     String href = element.getElementsByTag("a").first().attr("href");
+//                    if((href.startsWith("http://www.jianshu.com/") || href.startsWith("https://github.com/"))){
+//
+//                    }
+                    InterviewBean interviewBean = new InterviewBean();
                     interviewBean.setPart("第"+(i+1)+"部分");
                     interviewBean.setTag("第"+(i+1)+"部分");
                     interviewBean.setName(element.text());
@@ -127,6 +130,9 @@ public class MainPresenter implements MainContract.Presenter{
                         if(bean.getElementsByTag("a").size() != 0){
                             href = bean.getElementsByTag("a").first().attr("href");
                         }
+//                        if((href.startsWith("http://www.jianshu.com/") || href.startsWith("https://github.com/"))){
+//
+//                        }
                         InterviewBean interviewBean = new InterviewBean();
                         interviewBean.setPart("第"+(i+1)+"部分");
                         interviewBean.setTag(tagP.text());
@@ -135,6 +141,7 @@ public class MainPresenter implements MainContract.Presenter{
                         interviewBean.setCanLoad(href.length() != 0);
                         interviewBean.save();
                         LUtil.e("bean:"+interviewBean.toGson());
+
                     }else{
                         String beantag = bean.text();
                         if(beantag.contains(" ")){
@@ -148,6 +155,9 @@ public class MainPresenter implements MainContract.Presenter{
                                 if(beanData.getElementsByTag("a").size() != 0){
                                     href = beanData.getElementsByTag("a").first().attr("href");
                                 }
+//                                if((href.startsWith("http://www.jianshu.com/") || href.startsWith("https://github.com/"))){
+//
+//                                }
                                 InterviewBean interviewBean = new InterviewBean();
                                 interviewBean.setPart("第"+(i+1)+"部分");
                                 interviewBean.setTag(tagP.text());

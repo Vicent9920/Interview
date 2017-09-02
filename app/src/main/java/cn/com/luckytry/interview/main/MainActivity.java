@@ -2,6 +2,8 @@ package cn.com.luckytry.interview.main;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -30,6 +32,9 @@ import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.about.AboutActivity;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.diycode.ContentActivity;
+import cn.com.luckytry.interview.util.Const;
+import cn.com.luckytry.interview.util.LUtil;
+import cn.com.luckytry.interview.util.SharedPrefsUtil;
 import cn.com.luckytry.interview.view.DividerItemDecoration;
 import cn.com.luckytry.interview.view.SetDialog;
 import cn.com.luckytry.interview.view.TitleItemDecoration;
@@ -37,6 +42,7 @@ import cn.com.luckytry.interview.view.TitleItemDecoration;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,MainContract.View {
 
+    private static final String TAG = "MainActivity";
     private DrawerLayout drawer;
     private RecyclerView mRv;
     private View loadingView;
@@ -46,8 +52,9 @@ public class MainActivity extends AppCompatActivity
     private  boolean move = false;
     private LinearLayoutManager mManager;
     private int mIndex = 0;
-    private List<View> views = new ArrayList<>();
+    private List<TextView> views = new ArrayList<>();
     private MainPresenter mPresenter;
+    private boolean isRecreate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +64,10 @@ public class MainActivity extends AppCompatActivity
         mPresenter.setView(this);
         initViews();
         mPresenter.start();
-
+        LUtil.e(TAG,"onCreate");
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
+
 
     @Override
     public void onBackPressed() {
@@ -87,7 +90,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_change) {
             mPresenter.changeTheme();
 
-
+            isRecreate = true;
             recreate();
         } else if (id == R.id.nav_set) {
             //设置
@@ -118,11 +121,7 @@ public class MainActivity extends AppCompatActivity
        mPresenter.getPosition(tag);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
-    }
+
 
     @Override
     public void initViews() {
@@ -139,14 +138,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         TextView tvTitle = (TextView) findViewById(R.id.topbar_title);
         tvTitle.setText(R.string.app_name);
+        views.add((TextView) findViewById(R.id.tv1));
+        views.add((TextView) findViewById(R.id.tv2));
+        views.add((TextView) findViewById(R.id.tv3));
+        views.add((TextView) findViewById(R.id.tv4));
+        views.add((TextView) findViewById(R.id.tv5));
+        views.add((TextView) findViewById(R.id.tv6));
+        views.add((TextView) findViewById(R.id.tv7));
 
-        views.add(findViewById(R.id.tv1));
-        views.add(findViewById(R.id.tv2));
-        views.add(findViewById(R.id.tv3));
-        views.add(findViewById(R.id.tv4));
-        views.add(findViewById(R.id.tv5));
-        views.add(findViewById(R.id.tv6));
-        views.add(findViewById(R.id.tv7));
+
+
         mRv = (RecyclerView) findViewById(R.id.main_rvlist);
         mRv.setLayoutManager(mManager = new LinearLayoutManager(this));
         toast = Toast.makeText(this,"",Toast.LENGTH_SHORT);
@@ -234,6 +235,67 @@ public class MainActivity extends AppCompatActivity
         } else {
             mRv.smoothScrollToPosition(n);
             move = true;
+        }
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+        LUtil.e(TAG,"onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LUtil.e(TAG,"onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LUtil.e(TAG,"onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+        LUtil.e(TAG,"onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LUtil.e(TAG,"onDestroy");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("recreate",isRecreate);
+        super.onSaveInstanceState(outState);
+
+    }
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        boolean isrecreate = savedInstanceState.getBoolean("recreate");
+        if(isrecreate){
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
+                LUtil.e(TAG,"initView");
+                int mode = SharedPrefsUtil.getValue(this, Const.THEME_MOUDLE,1,false);
+                for (int i = 0; i < views.size(); i++) {
+                    //切换主题
+                    if(mode == Configuration.UI_MODE_NIGHT_YES) {
+                        views.get(i).setBackgroundResource(R.drawable.part_selected_bg_night);
+
+                    } else if(mode == Configuration.UI_MODE_NIGHT_NO) {
+                        views.get(i).setBackgroundResource(R.drawable.part_selected_bg_24);
+                    }
+                }
+
+            }
         }
     }
 

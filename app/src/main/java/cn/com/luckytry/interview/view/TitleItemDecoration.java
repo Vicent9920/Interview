@@ -6,9 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,7 +28,7 @@ public class TitleItemDecoration extends RecyclerView.ItemDecoration {
     private Paint mPaint;
     private Rect mBounds;//用于存放测量文字Rect
 
-    private LayoutInflater mInflater;
+
 
     private int mTitleHeight;//title的高
 //    private static int COLOR_TITLE_BG = Color.parseColor("#FFDFDFDF");
@@ -48,7 +46,7 @@ public class TitleItemDecoration extends RecyclerView.ItemDecoration {
         mTitleFontSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, context.getResources().getDisplayMetrics());
         mPaint.setTextSize(mTitleFontSize);
         mPaint.setAntiAlias(true);
-        mInflater = LayoutInflater.from(context);
+//        mInflater = LayoutInflater.from(context);
         mContext = context;
     }
 
@@ -113,7 +111,7 @@ public class TitleItemDecoration extends RecyclerView.ItemDecoration {
             boolean flag = false;//定义一个flag，Canvas是否位移过的标志
             if ((pos + 1) < mDatas.size()) {//防止数组越界（一般情况不会出现）
                 if (null != tag && !tag.equals(mDatas.get(pos + 1).getTag())) {//当前第一个可见的Item的tag，不等于其后一个item的tag，说明悬浮的View要切换了
-                    Log.d("zxt", "onDrawOver() called with: c = [" + child.getTop());//当getTop开始变负，它的绝对值，是第一个可见的Item移出屏幕的距离，
+
                     if (child.getHeight() + child.getTop() < mTitleHeight) {//当第一个可见的item在屏幕中还剩的高度小于title区域的高度时，我们也该开始做悬浮Title的“交换动画”
                         c.save();//每次绘制前 保存当前Canvas状态，
                         flag = true;

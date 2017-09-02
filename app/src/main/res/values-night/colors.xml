@@ -24,11 +24,12 @@
     <color name="colorSecondaryText">#b5b5b5</color>
     <color name="tagtextcolor">#cccccc</color>
     <color name="defult_textcolor">#999999</color>
-
+    <color name="colorwhite">#ffffff</color>
 
     <color name="colorBaseBackground">#212a2f</color>
     <color name="colorselected">#35464e</color>
     <color name="colorNavItemSelected">#03A9F4</color>
     <color name="colorNavItemUnselected">#8799a5</color>
+
 
 </resources>

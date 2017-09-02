@@ -132,11 +132,22 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
                 mWebView.loadUrl(source);
                 mWebView.setVisibility(View.VISIBLE);
             }else{
-                mWebView.loadUrl(mBean.getAdress());
+                if(url.startsWith("http://www.jianshu.com")){
+                    mWebView.isJianShu();
+                    mWebView.loadUrl(url);
+                }else{
+                    mWebView.loadUrl(mBean.getAdress());
+                }
+
             }
 
         }else{
-            mWebView.loadUrl(url);
+            if(url.startsWith("http://www.jianshu.com")){
+                mWebView.isJianShu();
+                mWebView.loadUrl(url);
+            }else{
+                mWebView.loadUrl(mBean.getAdress());
+            }
         }
         mWebView.setResultCall(new ShowTextWebView.onResultCall() {
             @Override

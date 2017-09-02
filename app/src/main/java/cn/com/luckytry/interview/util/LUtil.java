@@ -34,7 +34,18 @@ public class LUtil {
     {
         if (isDebug){
             if(null==msg)msg="";
-            Log.e(TAG, msg);
+            if(msg.length()>4000){
+                int len = msg.length();
+                int size = len/4000;
+                int count =len%4000;
+                for (int i = 0; i < size; i++) {
+                    Log.e(TAG,msg.substring(i*4000,(i+1)*4000));
+                }
+                Log.e(TAG,msg.substring(size*4000,msg.length()));
+            }else{
+                Log.e(TAG, msg);
+            }
+
         }
 
     }

@@ -53,6 +53,13 @@ public class Const {
                 "           white-space: pre-wrap; /* Firefox */ \n" +
                 "           word-break:break-all; \n" +
                 "       } \n" +
+                "article {\n" +
+                "\t\t\t\twidth: 100%;\n" +
+                "\t\t\t\tposition: fixed;\n" +
+                "\t\t\t\ttop: 0;\n" +
+                "\t\t\t\tbottom: 0;\n" +
+                "\t\t\t\toverflow: auto;\n" +
+                "\t\t\t}"+
                 "    </style>" +
                 "</head>" +
                 "<body>" +

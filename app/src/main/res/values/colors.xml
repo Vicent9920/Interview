@@ -14,4 +14,12 @@
     <color name="colorwhite">#ffffff</color>
     <color name="defult_textcolor">#333333</color>
     <color name="colorselected">#DDDDDD</color>
+
+    <color name="colorselected_24">#DDDDDD</color>
+    <color name="colorBaseBackground_24">#fafafa</color>
+    <color name="defult_textcolor_24">#333333</color>
+
+    <color name="colorselected_night">#35464e</color>
+    <color name="colorBaseBackground_night">#212a2f</color>
+    <color name="defult_textcolor_night">#999999</color>
 </resources>

@@ -53,7 +53,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         webView.setWebChromeClient(new WebChromeClient());
-        webView.loadUrl("file:///android_asset/about.html");
+        webView.loadUrl("file:///android_asset/demo3.html");
 
     }
 
