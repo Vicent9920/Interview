@@ -22,4 +22,6 @@
     <color name="colorselected_night">#35464e</color>
     <color name="colorBaseBackground_night">#212a2f</color>
     <color name="defult_textcolor_night">#999999</color>
+
+    <color name="progress_color">#00ff00</color>
 </resources>

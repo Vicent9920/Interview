@@ -9,24 +9,20 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
+import android.webkit.WebResourceError;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.crud.DataSupport;
 
 import java.util.List;
 
 import cn.com.luckytry.interview.MyApplication;
 import cn.com.luckytry.interview.R;
-import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.util.Const;
+import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
+import cn.com.luckytry.interview.view.Kawaii_LoadingView;
 import cn.com.luckytry.interview.view.ShowTextWebView;
 
 public class ContentActivity extends AppCompatActivity implements View.OnClickListener {
@@ -34,11 +30,11 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     private static final String TAG = "ContentActivity";
     private NestedScrollView mScrollView;
     private ShowTextWebView mWebView;
+    // 1. 定义控件变量
+    private Kawaii_LoadingView mLoadingView;
+
     private CollapsingToolbarLayout mToolbarLayout;
-    private RelativeLayout prepareLayout;
-    private ProgressBar mProgressBar;
-    private ImageView ivError;
-    private TextView tvError;
+
     private boolean isRefresh = false;
     private Handler mHandler;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -46,6 +42,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     private String name;
     private InterviewBean mBean;
     public static int mode;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +58,9 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+//        EventBus.getDefault().register(this);
         mode = SharedPrefsUtil.getValue(MyApplication.getContext(), Const.THEME_MOUDLE,1,false);
+        mLoadingView.startMoving();
     }
 
 
@@ -74,8 +72,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.back2);
         toolbar.setNavigationOnClickListener(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        TextView textView = (TextView) findViewById(R.id.tv_name);
-        textView.setText(tag);
+        textView = (TextView) findViewById(R.id.tv_name);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,15 +85,15 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state) {
                 if( state == State.EXPANDED ) {
-//                    mToolbarLayout.setTitle("");
+                    mToolbarLayout.setTitle("");
                     //展开状态
 
                 }else if(state == State.COLLAPSED){
-//                    mToolbarLayout.setTitle(tag);
+                    mToolbarLayout.setTitle(name);
                     //折叠状态
 
                 }else {
-//                    mToolbarLayout.setTitle(tag);
+                    mToolbarLayout.setTitle(name);
                     //中间状态
 
                 }
@@ -119,6 +116,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         mScrollView = (NestedScrollView) findViewById(R.id.scrollView);
         mToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         mWebView = (ShowTextWebView) findViewById(R.id.web_view);
+        mLoadingView = (Kawaii_LoadingView) findViewById(R.id.Kawaii_LoadingView);
 
         String url = getIntent().getStringExtra("url");
 
@@ -149,12 +147,27 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
                 mWebView.loadUrl(mBean.getAdress());
             }
         }
-        mWebView.setResultCall(new ShowTextWebView.onResultCall() {
+        mWebView.setResultCall(new ShowTextWebView.OnResultCall() {
             @Override
             public void load(String html) {
                 mBean.setContent(html);
                 mBean.saveAsync();
                 mWebView.setVisibility(View.VISIBLE);
+
+                mLoadingView.setVisibility(View.GONE);
+//                mLoadingView.stopMoving();
+            }
+        });
+        mWebView.setOnChangeListener(new ShowTextWebView.OnChangeListener() {
+            @Override
+            public void onProgressChanged(int newProgress) {
+                LUtil.e("Progress："+newProgress);
+
+            }
+
+            @Override
+            public void onReceivedError(WebResourceError error) {
+
             }
         });
 
@@ -163,21 +176,10 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onStop() {
         super.onStop();
-        EventBus.getDefault().unregister(this);
+//        EventBus.getDefault().unregister(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onMessageEvent(Events<Integer> event) {
-//        if(event.content == 100){
-//            mProgressBar.setVisibility(View.GONE);
-//            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-//            prepareLayout.setVisibility(View.GONE);
-//        }else{
-//            mProgressBar.setVisibility(View.VISIBLE);
-//            mProgressBar.setProgress(event.content);//设置加载进度
-//        }
 
-    }
 
     private void setCollapsingToolbarLayoutTitle(String title) {
         mToolbarLayout.setTitle(title);
@@ -185,6 +187,8 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
         mToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppBarPlus1);
         mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBarPlus1);
+
+        textView.setText(tag);
     }
 
     @Override

@@ -62,11 +62,43 @@
             android:scrollbarFadeDuration="1"
             android:fadeScrollbars="true">
 
-            <cn.com.luckytry.interview.view.ShowTextWebView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="invisible"
-                android:id="@+id/web_view" />
+                android:orientation="vertical">
+
+
+                <cn.com.luckytry.interview.view.Kawaii_LoadingView
+
+                    android:id="@+id/Kawaii_LoadingView"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+
+
+                    android:background="@color/colorBaseBackground"
+                    app:blockColor="@color/progress_color"
+
+                    app:lineNumber="3"
+                    app:fixBlock_Angle="5"
+                    app:moveBlock_Angle="20"
+
+                    app:blockInterval="8dp"
+                    app:half_BlockWidth="15dp"
+                    app:initPosition="0"
+
+                    app:isClock_Wise="false"
+                    app:moveSpeed="500"
+                    app:move_Interpolator="@android:anim/bounce_interpolator"
+
+                    />
+
+                <cn.com.luckytry.interview.view.ShowTextWebView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    android:id="@+id/web_view" />
+            </LinearLayout>
 
         </android.support.v4.widget.NestedScrollView>
 

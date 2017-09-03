@@ -31,5 +31,6 @@
     <color name="colorNavItemSelected">#03A9F4</color>
     <color name="colorNavItemUnselected">#8799a5</color>
 
+    <color name="progress_color">#6600ff00</color>
 
 </resources>

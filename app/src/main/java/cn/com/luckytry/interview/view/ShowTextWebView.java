@@ -13,12 +13,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import cn.com.luckytry.interview.MyApplication;
-import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.NetUtil;
@@ -33,7 +31,8 @@ public class ShowTextWebView extends WebView{
     private static final String TAG = "ShowTextWebView";
     private Context context;
     private boolean isLoad = true;
-    private onResultCall listener;
+    private OnResultCall listener;
+    private OnChangeListener changeListener;
     private boolean isJianShu = false;
 
     public ShowTextWebView(Context context) {
@@ -90,9 +89,10 @@ public class ShowTextWebView extends WebView{
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
-                Events<Integer> events = new Events<Integer>();
-                events.setContent(newProgress);
-                EventBus.getDefault().post(events);
+                if(changeListener!=null){
+                    changeListener.onProgressChanged(newProgress);
+                }
+
             }
         });
 
@@ -118,7 +118,7 @@ public class ShowTextWebView extends WebView{
                                 }
                             });
                         }
-                    },0000);
+                    },000);
 
                     isLoad = false;
                 }
@@ -138,9 +138,7 @@ public class ShowTextWebView extends WebView{
         getSettings().setBlockNetworkImage(!isShow);//解决图片不显示
 
     }
-    public void setResultCall(onResultCall call){
-        this.listener = call;
-    }
+
 
     private void loadValue( final String html){
         try {
@@ -190,7 +188,7 @@ public class ShowTextWebView extends WebView{
         @android.webkit.JavascriptInterface
         public void showSource(String html) {
 
-            LUtil.e("showSource:"+html);
+
             try {
                 Document doc = Jsoup.parse(html);
 
@@ -208,10 +206,19 @@ public class ShowTextWebView extends WebView{
 
         }
     }
-
-    public interface onResultCall{
+    public void setResultCall(OnResultCall call){
+        this.listener = call;
+    }
+    public interface OnResultCall{
         void load(String html);
     }
+    public void setOnChangeListener(OnChangeListener listener){
+        this.changeListener = listener;
+    }
 
+    public interface OnChangeListener{
+        void onProgressChanged(int newProgress);
+        void onReceivedError(WebResourceError error);
+    }
 
 }
