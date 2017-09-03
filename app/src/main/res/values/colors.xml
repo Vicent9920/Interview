@@ -24,4 +24,5 @@
     <color name="defult_textcolor_night">#999999</color>
 
     <color name="progress_color">#00ff00</color>
+    <color name="fab_color">#C3BED4</color>
 </resources>

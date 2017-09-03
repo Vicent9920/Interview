@@ -194,9 +194,11 @@ public class MainPresenter implements MainContract.Presenter{
         if(mode == Configuration.UI_MODE_NIGHT_YES) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             SharedPrefsUtil.putValue(MyApplication.getContext(),Const.THEME_MOUDLE,1);
+            LUtil.e("切换主题1");
         } else if(mode == Configuration.UI_MODE_NIGHT_NO) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             SharedPrefsUtil.putValue(MyApplication.getContext(),Const.THEME_MOUDLE,2);
+            LUtil.e("切换主题2");
         }
     }
 

@@ -22,6 +22,8 @@ public class InterviewBean extends DataSupport {
     private String content;
     //是否可加载
     private boolean isCanLoad;
+    //是否已经收藏
+    private boolean isStar;
 
     public String getPart() {
         return part;
@@ -73,5 +75,13 @@ public class InterviewBean extends DataSupport {
 
     public String toGson(){
         return new Gson().toJson(this);
+    }
+
+    public boolean isStar() {
+        return isStar;
+    }
+
+    public void setStar(boolean star) {
+        isStar = star;
     }
 }

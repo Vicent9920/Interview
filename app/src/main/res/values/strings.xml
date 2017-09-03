@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">面试·Android</string>
+    <string name="app_name">面试宝典</string>
 
     <string name="display_error">轻触屏幕重新加载</string>
     <string name="title_activity_test">TestActivity</string>

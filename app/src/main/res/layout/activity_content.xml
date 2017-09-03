@@ -30,7 +30,7 @@
                 android:scaleType="centerCrop"
                 android:scrollbarStyle="insideInset"
                 android:text="Android 基础知识"
-                android:textColor="#444444"
+                android:textColor="@color/titletextcolor"
                 android:textStyle="bold"
                 android:textSize="22sp"
                 android:gravity="center"
@@ -65,6 +65,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/colorBaseBackground"
                 android:orientation="vertical">
 
 
@@ -75,7 +76,7 @@
                     android:layout_height="400dp"
 
 
-                    android:background="@color/colorBaseBackground"
+                    android:background="#00ffffff"
                     app:blockColor="@color/progress_color"
 
                     app:lineNumber="3"
@@ -103,5 +104,16 @@
         </android.support.v4.widget.NestedScrollView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
+<android.support.design.widget.FloatingActionButton
+    android:id="@+id/fab_shar"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:src="@drawable/ic_share_24dp"
+    app:backgroundTint="@color/fab_color"
+    app:rippleColor="@color/colorPrimaryDark"
+    app:borderWidth="0dp"
+    app:layout_anchor="@id/app_bar"
+    app:layout_anchorGravity="bottom|end"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -33,4 +33,6 @@
 
     <color name="progress_color">#6600ff00</color>
 
+    <color name="titletextcolor">#cccccc</color>
+    <color name="fab_color">#044D22</color>
 </resources>
