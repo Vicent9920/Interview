@@ -18,9 +18,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zhy.adapter.recyclerview.CommonAdapter;
-import com.zhy.adapter.recyclerview.base.ViewHolder;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -30,8 +27,9 @@ import java.util.List;
 
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.about.AboutActivity;
+import cn.com.luckytry.interview.adapter.MyAdapter;
 import cn.com.luckytry.interview.bean.InterviewBean;
-import cn.com.luckytry.interview.diycode.ContentActivity;
+import cn.com.luckytry.interview.star.StarActivity;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
@@ -87,7 +85,11 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_main) {
             // Handle the camera action
-        } else if (id == R.id.nav_change) {
+        }else if(id == R.id.nav_star){
+            Intent intent = new Intent(this, StarActivity.class);
+            startActivity(intent);
+        }
+        else if (id == R.id.nav_change) {
             mPresenter.changeTheme();
 
             isRecreate = true;
@@ -299,37 +301,4 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    class MyAdapter extends CommonAdapter<InterviewBean>{
-
-        private List<InterviewBean> data;
-        public MyAdapter(Context context, int layoutId, List<InterviewBean> datas) {
-            super(context, layoutId, datas);
-            this.data = datas;
-        }
-
-        public void setData(List<InterviewBean> data){
-            this.data = data;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        protected void convert(ViewHolder holder, final InterviewBean interviewBean, int position) {
-            holder.setText(R.id.tvInterview,interviewBean.getName());
-            holder.getConvertView().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(interviewBean.isCanLoad()){
-                        Intent intent = new Intent(MainActivity.this, ContentActivity.class);
-                        intent.putExtra("url",interviewBean.getAdress());
-                        intent.putExtra("name",interviewBean.getName());
-                        intent.putExtra("tag",interviewBean.getTag());
-                        startActivity(intent);
-                    }else{
-                        toast.setText(interviewBean.getName()+" 作者暂未开发！");
-                        toast.show();
-                    }
-                }
-            });
-        }
-    }
 }

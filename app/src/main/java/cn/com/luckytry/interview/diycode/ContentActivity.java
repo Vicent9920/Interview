@@ -12,6 +12,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -27,15 +28,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.litepal.crud.DataSupport;
+import org.litepal.crud.callback.SaveCallback;
 
 import java.util.List;
 
-import cn.com.luckytry.interview.MyApplication;
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
-import cn.com.luckytry.interview.util.SharedPrefsUtil;
 import cn.com.luckytry.interview.view.Kawaii_LoadingView;
 import cn.com.luckytry.interview.view.ShowTextWebView;
 
@@ -55,7 +55,6 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     private String tag;
     private String name;
     private InterviewBean mBean;
-    public static int mode;
     private TextView textView;
     private String url;
     private BottomSheetDialog mBottomSheetDialog;
@@ -75,7 +74,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     protected void onStart() {
         super.onStart();
 //        EventBus.getDefault().register(this);
-        mode = SharedPrefsUtil.getValue(MyApplication.getContext(), Const.THEME_MOUDLE,1,false);
+
         mLoadingView.startMoving();
     }
 
@@ -141,9 +140,9 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         if (beans.size()>0){
             mBean = beans.get(0);
 
-            if(mBean.getContent()!=null){
+            if(mBean.isValidContent()){
                 mWebView.isShowSource();
-                String source = Const.getData(mBean.getContent());
+                String source = Const.getData(ContentActivity.this,mBean.getContent());
                 mWebView.loadUrl(source);
                 mWebView.setVisibility(View.VISIBLE);
             }else{
@@ -168,7 +167,13 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void load(String html) {
                 mBean.setContent(html);
-                mBean.saveAsync();
+                mBean.saveAsync().listen(new SaveCallback() {
+                    @Override
+                    public void onFinish(boolean success) {
+                        mBean.setValidContent(true);
+                        mBean.saveAsync();
+                    }
+                });
                 mWebView.setVisibility(View.VISIBLE);
 
                 mLoadingView.setVisibility(View.GONE);
@@ -248,6 +253,13 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
         }else{
+            if(mBean.isStar()){
+                ivStar.setImageResource(R.mipmap.star);
+                tvStar.setText("取消收藏");
+            }else{
+                ivStar.setImageResource(R.mipmap.unstar);
+                tvStar.setText("添加到收藏");
+            }
             mBottomSheetDialog.show();
         }
 
@@ -286,8 +298,16 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         switch (tag){
             case "star":
+                boolean state = mBean.isStar();
+                mBean.setStar(!state);
+                mBean.save();
 
-                mBean.setStar(!mBean.isStar());
+                String info = "已添加到收藏";
+                if(state){
+                    info = "已从收藏中删除";
+                }
+
+                Snackbar.make(mWebView,info,Snackbar.LENGTH_SHORT).show();
                 break;
             case "link":
                 // 创建普通字符型ClipData

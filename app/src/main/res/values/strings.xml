@@ -46,5 +46,8 @@
     <string name="sure">确定</string>
     <string name="yes">是的</string>
     <string name="main_file">main.html</string>
+    <string name="title_activity_star">收藏</string>
+
+    <string name="action_settings">Settings</string>
 
 </resources>

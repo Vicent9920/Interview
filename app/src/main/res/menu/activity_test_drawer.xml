@@ -8,6 +8,11 @@
             android:icon="@drawable/ic_main"
             android:title="首页" />
 
+        <item
+            android:id="@+id/nav_star"
+            android:icon="@mipmap/unstar"
+            android:title="收藏" />
+
     </group>
 
     <item  tools:ignore="MenuTitle">

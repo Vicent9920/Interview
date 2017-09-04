@@ -1,8 +1,7 @@
 package cn.com.luckytry.interview.util;
 
+import android.content.Context;
 import android.content.res.Configuration;
-
-import cn.com.luckytry.interview.diycode.ContentActivity;
 
 /**
  * 常量管理类
@@ -22,12 +21,13 @@ public class Const {
      * @param html
      * @return
      */
-    public static String getData(String html){
+    public static String getData(Context context,String html){
         String bgcolor = "";
+        int mode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         //切换主题
-        if(ContentActivity.mode == Configuration.UI_MODE_NIGHT_YES) {//夜间模式
+        if(mode == Configuration.UI_MODE_NIGHT_YES) {//夜间模式
             bgcolor = "background: #6F6F6F;\n";
-        } else if(ContentActivity.mode == Configuration.UI_MODE_NIGHT_NO) {//日间模式
+        } else if(mode == Configuration.UI_MODE_NIGHT_NO) {//日间模式
             bgcolor = "background: #f0f0f0;\n";
         }
         String source = "<!DOCTYPE html>\n"

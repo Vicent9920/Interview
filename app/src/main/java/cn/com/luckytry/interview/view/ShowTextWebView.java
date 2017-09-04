@@ -151,7 +151,7 @@ public class ShowTextWebView extends WebView{
                 @Override
                 public void run() {
 
-                    String source = Const.getData(html);
+                    String source = Const.getData(getContext(),html);
                     loadDataWithBaseURL(null, source, "text/html", "utf-8",null);
                     getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
                     if(listener!=null){

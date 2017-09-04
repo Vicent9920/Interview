@@ -24,6 +24,8 @@ public class InterviewBean extends DataSupport {
     private boolean isCanLoad;
     //是否已经收藏
     private boolean isStar;
+    //资源是否有效
+    private boolean isValidContent;
 
     public String getPart() {
         return part;
@@ -83,5 +85,13 @@ public class InterviewBean extends DataSupport {
 
     public void setStar(boolean star) {
         isStar = star;
+    }
+
+    public boolean isValidContent() {
+        return isValidContent;
+    }
+
+    public void setValidContent(boolean validContent) {
+        isValidContent = validContent;
     }
 }
