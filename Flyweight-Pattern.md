@@ -16,15 +16,19 @@
 我们将创建一个 Shape 接口和实现了 Shape 接口的实体类 Circle。下一步是定义工厂类 ShapeFactory。
 ShapeFactory 有一个 Circle 的 HashMap，其中键名为 Circle 对象的颜色。无论何时接收到请求，都会创建一个特定颜色的圆。ShapeFactory 检查它的 HashMap 中的 circle 对象，如果找到 Circle 对象，则返回该对象，否则将创建一个存储在 hashmap 中以备后续使用的新对象，并把该对象返回到客户端。
 FlyWeightPatternDemo，我们的演示类使用 ShapeFactory 来获取 Shape 对象。它将向 ShapeFactory 传递信息（red / green / blue/ black / white），以便获取它所需对象的颜色。
-享元模式的 UML 图
-步骤 1
+### 享元模式的 UML 图
+* 步骤 1 
 创建一个接口。
+
+```
 Shape.java
 public interface Shape {
    void draw();
 }
-步骤 2
+```
+* 步骤 2 
 创建实现接口的实体类。
+```
 Circle.java
 public class Circle implements Shape {
    private String color;
@@ -54,8 +58,10 @@ public class Circle implements Shape {
          +", x : " + x +", y :" + y +", radius :" + radius);
    }
 }
-步骤 3
-创建一个工厂，生成基于给定信息的实体类的对象。
+```
+* 步骤 3
+创建一个工厂，生成基于给定信息的实体类的对象
+```
 ShapeFactory.java
 import java.util.HashMap;
 
@@ -73,8 +79,10 @@ public class ShapeFactory {
       return circle;
    }
 }
-步骤 4
+```
+* 步骤 4
 使用该工厂，通过传递颜色信息来获取实体类的对象。
+```
 FlyweightPatternDemo.java
 public class FlyweightPatternDemo {
    private static final String colors[] = 
@@ -100,8 +108,12 @@ public class FlyweightPatternDemo {
       return (int)(Math.random()*100);
    }
 }
-步骤 5
+```
+
+* 步骤 5
 验证输出。
+
+```
 Creating circle of color : Black
 Circle: Draw() [Color : Black, x : 36, y :71, radius :100
 Creating circle of color : Green
@@ -127,3 +139,4 @@ Circle: Draw() [Color : Green, x : 86, y :12, radius :100
 Circle: Draw() [Color : Green, x : 38, y :93, radius :100
 Circle: Draw() [Color : Red, x : 76, y :82, radius :100
 Circle: Draw() [Color : Blue, x : 95, y :82, radius :100
+```
