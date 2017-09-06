@@ -1,311 +1,129 @@
-# JAVA设计模式初探之装饰者模式
-###### （选自炸斯特——http://blog.csdn.net/jason0539/article/details/22713711）
-这个模式花费了挺长时间，开始有点难理解，其实就是
-定义：动态给一个对象添加一些额外的职责,就象在墙上刷油漆.使用Decorator模式相比用生成子类方式达到功能的扩充显得更为灵活。
-设计初衷:通常可以使用继承来实现功能的拓展,如果这些需要拓展的功能的种类很繁多,那么势必生成很多子类,增加系统的复杂性,同时,使用继承实现功能拓展,我们必须可预见这些拓展功能,这些功能是编译时就确定了,是静态的。
+## 享元模式
+享元模式（Flyweight Pattern）主要用于减少创建对象的数量，以减少内存占用和提高性能。这种类型的设计模式属于结构型模式，它提供了减少对象数量从而改善应用所需的对象结构的方式。
+享元模式尝试重用现有的同类对象，如果未找到匹配的对象，则创建新对象。我们将通过创建 5 个对象来画出 20 个分布于不同位置的圆来演示这种模式。由于只有 5 种可用的颜色，所以 color 属性被用来检查现有的 Circle 对象。
+### 介绍
+意图：运用共享技术有效地支持大量细粒度的对象。
+主要解决：在有大量对象时，有可能会造成内存溢出，我们把其中共同的部分抽象出来，如果有相同的业务请求，直接返回在内存中已有的对象，避免重新创建。
+何时使用： 1、系统中有大量对象。 2、这些对象消耗大量内存。 3、这些对象的状态大部分可以外部化。 4、这些对象可以按照内蕴状态分为很多组，当把外蕴对象从对象中剔除出来时，每一组对象都可以用一个对象来代替。 5、系统不依赖于这些对象身份，这些对象是不可分辨的。
+如何解决：用唯一标识码判断，如果在内存中有，则返回这个唯一标识码所标识的对象。
+关键代码：用 HashMap 存储这些对象。
+应用实例： 1、JAVA 中的 String，如果有则返回，如果没有则创建一个字符串保存在字符串缓存池里面。 2、数据库的数据池。
+优点：大大减少对象的创建，降低系统的内存，使效率提高。
+缺点：提高了系统的复杂度，需要分离出外部状态和内部状态，而且外部状态具有固有化的性质，不应该随着内部状态的变化而变化，否则会造成系统的混乱。
+使用场景： 1、系统有大量相似对象。 2、需要缓冲池的场景。
+注意事项： 1、注意划分外部状态和内部状态，否则可能会引起线程安全问题。 2、这些类必须有一个工厂对象加以控制。
+### 实现
+我们将创建一个 Shape 接口和实现了 Shape 接口的实体类 Circle。下一步是定义工厂类 ShapeFactory。
+ShapeFactory 有一个 Circle 的 HashMap，其中键名为 Circle 对象的颜色。无论何时接收到请求，都会创建一个特定颜色的圆。ShapeFactory 检查它的 HashMap 中的 circle 对象，如果找到 Circle 对象，则返回该对象，否则将创建一个存储在 hashmap 中以备后续使用的新对象，并把该对象返回到客户端。
+FlyWeightPatternDemo，我们的演示类使用 ShapeFactory 来获取 Shape 对象。它将向 ShapeFactory 传递信息（red / green / blue/ black / white），以便获取它所需对象的颜色。
+享元模式的 UML 图
+步骤 1
+创建一个接口。
+Shape.java
+public interface Shape {
+   void draw();
+}
+步骤 2
+创建实现接口的实体类。
+Circle.java
+public class Circle implements Shape {
+   private String color;
+   private int x;
+   private int y;
+   private int radius;
 
-### 要点：
-装饰者与被装饰者拥有共同的超类，继承的目的是继承类型，而不是行为
+   public Circle(String color){
+      this.color = color;		
+   }
 
-   实际上Java 的I/O API就是使用Decorator实现的。
-   
-   ```
-//定义被装饰者  
-public interface Human {  
-    public void wearClothes();  
-  
-    public void walkToWhere();  
-}  
-  
-//定义装饰者  
-public abstract class Decorator implements Human {  
-    private Human human;  
-  
-    public Decorator(Human human) {  
-        this.human = human;  
-    }  
-  
-    public void wearClothes() {  
-        human.wearClothes();  
-    }  
-  
-    public void walkToWhere() {  
-        human.walkToWhere();  
-    }  
-}  
-  
-//下面定义三种装饰，这是第一个，第二个第三个功能依次细化，即装饰者的功能越来越多  
-public class Decorator_zero extends Decorator {  
-  
-    public Decorator_zero(Human human) {  
-        super(human);  
-    }  
-  
-    public void goHome() {  
-        System.out.println("进房子。。");  
-    }  
-  
-    public void findMap() {  
-        System.out.println("书房找找Map。。");  
-    }  
-  
-    @Override  
-    public void wearClothes() {  
-        // TODO Auto-generated method stub  
-        super.wearClothes();  
-        goHome();  
-    }  
-  
-    @Override  
-    public void walkToWhere() {  
-        // TODO Auto-generated method stub  
-        super.walkToWhere();  
-        findMap();  
-    }  
-}  
-  
-public class Decorator_first extends Decorator {  
-  
-    public Decorator_first(Human human) {  
-        super(human);  
-    }  
-  
-    public void goClothespress() {  
-        System.out.println("去衣柜找找看。。");  
-    }  
-  
-    public void findPlaceOnMap() {  
-        System.out.println("在Map上找找。。");  
-    }  
-  
-    @Override  
-    public void wearClothes() {  
-        // TODO Auto-generated method stub  
-        super.wearClothes();  
-        goClothespress();  
-    }  
-  
-    @Override  
-    public void walkToWhere() {  
-        // TODO Auto-generated method stub  
-        super.walkToWhere();  
-        findPlaceOnMap();  
-    }  
-}  
-  
-public class Decorator_two extends Decorator {  
-  
-    public Decorator_two(Human human) {  
-        super(human);  
-    }  
-  
-    public void findClothes() {  
-        System.out.println("找到一件D&G。。");  
-    }  
-  
-    public void findTheTarget() {  
-        System.out.println("在Map上找到神秘花园和城堡。。");  
-    }  
-  
-    @Override  
-    public void wearClothes() {  
-        // TODO Auto-generated method stub  
-        super.wearClothes();  
-        findClothes();  
-    }  
-  
-    @Override  
-    public void walkToWhere() {  
-        // TODO Auto-generated method stub  
-        super.walkToWhere();  
-        findTheTarget();  
-    }  
-}  
-  
-//定义被装饰者，被装饰者初始状态有些自己的装饰  
-public class Person implements Human {  
-  
-    @Override  
-    public void wearClothes() {  
-        // TODO Auto-generated method stub  
-        System.out.println("穿什么呢。。");  
-    }  
-  
-    @Override  
-    public void walkToWhere() {  
-        // TODO Auto-generated method stub  
-        System.out.println("去哪里呢。。");  
-    }  
-}  
-//测试类，看一下你就会发现，跟java的I/O操作有多么相似  
-public class Test {  
-    public static void main(String[] args) {  
-        Human person = new Person();  
-        Decorator decorator = new Decorator_two(new Decorator_first(  
-                new Decorator_zero(person)));  
-        decorator.wearClothes();  
-        decorator.walkToWhere();  
-    }  
-}  
-```
-**运行结果：**
+   public void setX(int x) {
+      this.x = x;
+   }
 
+   public void setY(int y) {
+      this.y = y;
+   }
 
-![日志](http://img.blog.csdn.net/20140401085445906?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvamFzb24wNTM5/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+   public void setRadius(int radius) {
+      this.radius = radius;
+   }
 
-其实就是进房子找衣服，然后找地图这样一个过程，通过装饰者的三层装饰，把细节变得丰富。
-### 关键点：
-1、Decorator抽象类中，持有Human接口，方法全部委托给该接口调用，目的是交给该接口的实现类即子类进行调用。
-2、Decorator抽象类的子类（具体装饰者），里面都有一个构造方法调用super(human),这一句就体现了抽象类依赖于子类实现即抽象依赖于实现的原则。因为构造里面参数都是Human接口，只要是该Human的实现类都可以传递进去，即表现出Decorator dt = new Decorator_second(new Decorator_first(new Decorator_zero(human)));这种结构的样子。所以当调用dt.wearClothes();dt.walkToWhere()的时候，又因为每个具体装饰者类中，都先调用super.wearClothes和super.walkToWhere()方法，而该super已经由构造传递并指向了具体的某一个装饰者类（这个可以根据需要调换顺序），那么调用的即为装饰类的方法，然后才调用自身的装饰方法，即表现出一种装饰、链式的类似于过滤的行为。
-3、具体被装饰者类，可以定义初始的状态或者初始的自己的装饰，后面的装饰行为都在此基础上一步一步进行点缀、装饰。
-4、装饰者模式的设计原则为：对扩展开放、对修改关闭，这句话体现在我如果想扩展被装饰者类的行为，无须修改装饰者抽象类，只需继承装饰者抽象类，实现额外的一些装饰或者叫行为即可对被装饰者进行包装。所以：扩展体现在继承、修改体现在子类中，而不是具体的抽象类，这充分体现了依赖倒置原则，这是自己理解的装饰者模式。
+   @Override
+   public void draw() {
+      System.out.println("Circle: Draw() [Color : " + color 
+         +", x : " + x +", y :" + y +", radius :" + radius);
+   }
+}
+步骤 3
+创建一个工厂，生成基于给定信息的实体类的对象。
+ShapeFactory.java
+import java.util.HashMap;
 
-说的不清楚，有些只可意会不可言传的感觉，多看几遍代码，然后自己敲出来运行一下，基本上就领悟了。
+public class ShapeFactory {
+   private static final HashMap<String, Shape> circleMap = new HashMap<>();
 
-下面这个例子也有助于理解 装饰的流程和作用
-现在需要一个汉堡，主体是鸡腿堡，可以选择添加生菜、酱、辣椒等等许多其他的配料，这种情况下就可以使用装饰者模式。
+   public static Shape getCircle(String color) {
+      Circle circle = (Circle)circleMap.get(color);
 
- 1. Decorator抽象类中，持有Human接口，方法全部委托给该接口调用，目的是交给该接口的实现类即子类进行调用。
- 2. Decorator抽象类的子类（具体装饰者），里面都有一个构造方法调用super(human),这一句就体现了抽象类依赖于子类实现即抽象依赖于实现的原则。因为构造里面参数都是Human接口，只要是该Human的实现类都可以传递进去，即表现出Decorator dt = new Decorator_second(new Decorator_first(new Decorator_zero(human)));这种结构的样子。所以当调用dt.wearClothes();dt.walkToWhere()的时候，又因为每个具体装饰者类中，都先调用super.wearClothes和super.walkToWhere()方法，而该super已经由构造传递并指向了具体的某一个装饰者类（这个可以根据需要调换顺序），那么调用的即为装饰类的方法，然后才调用自身的装饰方法，即表现出一种装饰、链式的类似于过滤的行为。
- 3. 具体被装饰者类，可以定义初始的状态或者初始的自己的装饰，后面的装饰行为都在此基础上一步一步进行点缀、装饰。
- 4. 装饰者模式的设计原则为：对扩展开放、对修改关闭，这句话体现在我如果想扩展被装饰者类的行为，无须修改装饰者抽象类，只需继承装饰者抽象类，实现额外的一些装饰或者叫行为即可对被装饰者进行包装。所以：扩展体现在继承、修改体现在子类中，而不是具体的抽象类，这充分体现了依赖倒置原则，这是自己理解的装饰者模式。
- 
- 说的不清楚，有些只可意会不可言传的感觉，多看几遍代码，然后自己敲出来运行一下，基本上就领悟了。
+      if(circle == null) {
+         circle = new Circle(color);
+         circleMap.put(color, circle);
+         System.out.println("Creating circle of color : " + color);
+      }
+      return circle;
+   }
+}
+步骤 4
+使用该工厂，通过传递颜色信息来获取实体类的对象。
+FlyweightPatternDemo.java
+public class FlyweightPatternDemo {
+   private static final String colors[] = 
+      { "Red", "Green", "Blue", "White", "Black" };
+   public static void main(String[] args) {
 
-下面这个例子也有助于理解 装饰的流程和作用
-现在需要一个汉堡，主体是鸡腿堡，可以选择添加生菜、酱、辣椒等等许多其他的配料，这种情况下就可以使用装饰者模式。
-
-汉堡基类（被装饰者，相当于上面的Human）
-```
-package decorator;    
-    
-public abstract class Humburger {    
-        
-    protected  String name ;    
-        
-    public String getName(){    
-        return name;    
-    }    
-        
-    public abstract double getPrice();    
-    
-}    
-```
-
-鸡腿堡类（被装饰者的初始状态，有些自己的简单装饰，相当于上面的Person）
-
-```
-package decorator;    
-    
-public class ChickenBurger extends Humburger {    
-        
-    public ChickenBurger(){    
-        name = "鸡腿堡";    
-    }    
-    
-    @Override    
-    public double getPrice() {    
-        return 10;    
-    }    
-    
-}    
-```
-
-配料的基类（装饰者，用来对汉堡进行多层装饰，每层装饰增加一些配料，相当于上面Decorator）
-
-```
-package decorator;    
-    
-public abstract class Condiment extends Humburger {    
-        
-    public abstract String getName();    
-    
-}    
-```
-
-生菜（装饰者的第一层，相当于上面的decorator_zero）
-
-```
-package decorator;    
-    
-public class Lettuce extends Condiment {    
-        
-    Humburger humburger;    
-        
-    public Lettuce(Humburger humburger){    
-        this.humburger = humburger;    
-    }    
-    
-    @Override    
-    public String getName() {    
-        return humburger.getName()+" 加生菜";    
-    }    
-    
-    @Override    
-    public double getPrice() {    
-        return humburger.getPrice()+1.5;    
-    }    
-    
-}    
-
-```
-
-辣椒（装饰者的第二层，相当于上面的decorator_first）
-
-```
-package decorator;    
-    
-public class Chilli extends Condiment {    
-        
-    Humburger humburger;    
-        
-    public Chilli(Humburger humburger){    
-        this.humburger = humburger;    
-            
-    }    
-    
-    @Override    
-    public String getName() {    
-        return humburger.getName()+" 加辣椒";    
-    }    
-    
-    @Override    
-    public double getPrice() {    
-        return humburger.getPrice();  //辣椒是免费的哦    
-    }    
-    
-}    
-```
-
-测试类
-
-```
-package decorator;    
-    
-public class Test {    
-    
-    /**  
-     * @param args  
-     */    
-    public static void main(String[] args) {    
-        Humburger humburger = new ChickenBurger();    
-        System.out.println(humburger.getName()+"  价钱："+humburger.getPrice());    
-        Lettuce lettuce = new Lettuce(humburger);    
-        System.out.println(lettuce.getName()+"  价钱："+lettuce.getPrice());    
-        Chilli chilli = new Chilli(humburger);    
-        System.out.println(chilli.getName()+"  价钱："+chilli.getPrice());    
-        Chilli chilli2 = new Chilli(lettuce);    
-        System.out.println(chilli2.getName()+"  价钱："+chilli2.getPrice());    
-    }    
-    
-}    
-```
-
-输出
-
-```
-鸡腿堡  价钱：10.0    
-鸡腿堡 加生菜  价钱：11.5    
-鸡腿堡 加辣椒  价钱：10.0    
-鸡腿堡 加生菜 加辣椒  价钱：11.5   
-```
+      for(int i=0; i < 20; ++i) {
+         Circle circle = 
+            (Circle)ShapeFactory.getCircle(getRandomColor());
+         circle.setX(getRandomX());
+         circle.setY(getRandomY());
+         circle.setRadius(100);
+         circle.draw();
+      }
+   }
+   private static String getRandomColor() {
+      return colors[(int)(Math.random()*colors.length)];
+   }
+   private static int getRandomX() {
+      return (int)(Math.random()*100 );
+   }
+   private static int getRandomY() {
+      return (int)(Math.random()*100);
+   }
+}
+步骤 5
+验证输出。
+Creating circle of color : Black
+Circle: Draw() [Color : Black, x : 36, y :71, radius :100
+Creating circle of color : Green
+Circle: Draw() [Color : Green, x : 27, y :27, radius :100
+Creating circle of color : White
+Circle: Draw() [Color : White, x : 64, y :10, radius :100
+Creating circle of color : Red
+Circle: Draw() [Color : Red, x : 15, y :44, radius :100
+Circle: Draw() [Color : Green, x : 19, y :10, radius :100
+Circle: Draw() [Color : Green, x : 94, y :32, radius :100
+Circle: Draw() [Color : White, x : 69, y :98, radius :100
+Creating circle of color : Blue
+Circle: Draw() [Color : Blue, x : 13, y :4, radius :100
+Circle: Draw() [Color : Green, x : 21, y :21, radius :100
+Circle: Draw() [Color : Blue, x : 55, y :86, radius :100
+Circle: Draw() [Color : White, x : 90, y :70, radius :100
+Circle: Draw() [Color : Green, x : 78, y :3, radius :100
+Circle: Draw() [Color : Green, x : 64, y :89, radius :100
+Circle: Draw() [Color : Blue, x : 3, y :91, radius :100
+Circle: Draw() [Color : Blue, x : 62, y :82, radius :100
+Circle: Draw() [Color : Green, x : 97, y :61, radius :100
+Circle: Draw() [Color : Green, x : 86, y :12, radius :100
+Circle: Draw() [Color : Green, x : 38, y :93, radius :100
+Circle: Draw() [Color : Red, x : 76, y :82, radius :100
+Circle: Draw() [Color : Blue, x : 95, y :82, radius :100
