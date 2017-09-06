@@ -10,6 +10,8 @@ import org.litepal.crud.DataSupport;
  */
 
 public class InterviewBean extends DataSupport {
+
+    public int id;
     //卷
     private String part;
     //知识类型
@@ -26,6 +28,16 @@ public class InterviewBean extends DataSupport {
     private boolean isStar;
     //资源是否有效
     private boolean isValidContent;
+    //语音文件地址
+    private String speechPath;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getPart() {
         return part;
@@ -93,5 +105,13 @@ public class InterviewBean extends DataSupport {
 
     public void setValidContent(boolean validContent) {
         isValidContent = validContent;
+    }
+
+    public String getSpeechPath() {
+        return speechPath;
+    }
+
+    public void setSpeechPath(String speechPath) {
+        this.speechPath = speechPath;
     }
 }
