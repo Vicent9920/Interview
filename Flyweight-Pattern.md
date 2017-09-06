@@ -1,4 +1,5 @@
 # JAVA设计模式初探之装饰者模式
+###### （选自炸斯特——http://blog.csdn.net/jason0539/article/details/22713711）
 这个模式花费了挺长时间，开始有点难理解，其实就是
 定义：动态给一个对象添加一些额外的职责,就象在墙上刷油漆.使用Decorator模式相比用生成子类方式达到功能的扩充显得更为灵活。
 设计初衷:通常可以使用继承来实现功能的拓展,如果这些需要拓展的功能的种类很繁多,那么势必生成很多子类,增加系统的复杂性,同时,使用继承实现功能拓展,我们必须可预见这些拓展功能,这些功能是编译时就确定了,是静态的。
@@ -149,7 +150,8 @@ public class Test {
 ```
 **运行结果：**
 
-![**运行结果：**](http://img.blog.csdn.net/20140401085445906?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvamFzb24wNTM5/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+![日志](http://img.blog.csdn.net/20140401085445906?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvamFzb24wNTM5/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 其实就是进房子找衣服，然后找地图这样一个过程，通过装饰者的三层装饰，把细节变得丰富。
 ### 关键点：
@@ -174,4 +176,136 @@ public class Test {
 现在需要一个汉堡，主体是鸡腿堡，可以选择添加生菜、酱、辣椒等等许多其他的配料，这种情况下就可以使用装饰者模式。
 
 汉堡基类（被装饰者，相当于上面的Human）
+```
+package decorator;    
+    
+public abstract class Humburger {    
+        
+    protected  String name ;    
+        
+    public String getName(){    
+        return name;    
+    }    
+        
+    public abstract double getPrice();    
+    
+}    
+```
 
+鸡腿堡类（被装饰者的初始状态，有些自己的简单装饰，相当于上面的Person）
+
+```
+package decorator;    
+    
+public class ChickenBurger extends Humburger {    
+        
+    public ChickenBurger(){    
+        name = "鸡腿堡";    
+    }    
+    
+    @Override    
+    public double getPrice() {    
+        return 10;    
+    }    
+    
+}    
+```
+
+配料的基类（装饰者，用来对汉堡进行多层装饰，每层装饰增加一些配料，相当于上面Decorator）
+
+```
+package decorator;    
+    
+public abstract class Condiment extends Humburger {    
+        
+    public abstract String getName();    
+    
+}    
+```
+
+生菜（装饰者的第一层，相当于上面的decorator_zero）
+
+```
+package decorator;    
+    
+public class Lettuce extends Condiment {    
+        
+    Humburger humburger;    
+        
+    public Lettuce(Humburger humburger){    
+        this.humburger = humburger;    
+    }    
+    
+    @Override    
+    public String getName() {    
+        return humburger.getName()+" 加生菜";    
+    }    
+    
+    @Override    
+    public double getPrice() {    
+        return humburger.getPrice()+1.5;    
+    }    
+    
+}    
+
+```
+
+辣椒（装饰者的第二层，相当于上面的decorator_first）
+
+```
+package decorator;    
+    
+public class Chilli extends Condiment {    
+        
+    Humburger humburger;    
+        
+    public Chilli(Humburger humburger){    
+        this.humburger = humburger;    
+            
+    }    
+    
+    @Override    
+    public String getName() {    
+        return humburger.getName()+" 加辣椒";    
+    }    
+    
+    @Override    
+    public double getPrice() {    
+        return humburger.getPrice();  //辣椒是免费的哦    
+    }    
+    
+}    
+```
+
+测试类
+
+```
+package decorator;    
+    
+public class Test {    
+    
+    /**  
+     * @param args  
+     */    
+    public static void main(String[] args) {    
+        Humburger humburger = new ChickenBurger();    
+        System.out.println(humburger.getName()+"  价钱："+humburger.getPrice());    
+        Lettuce lettuce = new Lettuce(humburger);    
+        System.out.println(lettuce.getName()+"  价钱："+lettuce.getPrice());    
+        Chilli chilli = new Chilli(humburger);    
+        System.out.println(chilli.getName()+"  价钱："+chilli.getPrice());    
+        Chilli chilli2 = new Chilli(lettuce);    
+        System.out.println(chilli2.getName()+"  价钱："+chilli2.getPrice());    
+    }    
+    
+}    
+```
+
+输出
+
+```
+鸡腿堡  价钱：10.0    
+鸡腿堡 加生菜  价钱：11.5    
+鸡腿堡 加辣椒  价钱：10.0    
+鸡腿堡 加生菜 加辣椒  价钱：11.5   
+```
