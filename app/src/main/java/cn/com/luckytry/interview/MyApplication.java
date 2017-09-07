@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatDelegate;
 import org.litepal.LitePal;
 
 import cn.com.luckytry.interview.service.SpeechService;
+import cn.com.luckytry.interview.service.SynthesizeService;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
@@ -32,6 +33,7 @@ public class MyApplication extends Application {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
         startService(new Intent(this, SpeechService.class));
+        startService(new Intent(this, SynthesizeService.class));
     }
 
     public static Context getContext(){
