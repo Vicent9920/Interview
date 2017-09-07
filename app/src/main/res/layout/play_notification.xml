@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="@color/main_dark" >
+    <ImageView
+        android:id="@+id/music_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_margin="6dp"
+        android:layout_marginRight="18dp"
+        android:contentDescription="@string/app_name"
+        android:src="@mipmap/logo"
+        android:layout_gravity="center_vertical"
+        />
+    <TextView
+        android:id="@+id/music_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="Android基础知识"
+        android:layout_alignBottom="@+id/music_icon"
+        android:layout_toEndOf="@+id/music_icon"
+        android:layout_marginBottom="17dp" />
+    <ImageView
+        android:id="@+id/music_play_pre"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_play"
+        android:layout_gravity="center_vertical"
+        android:layout_alignTop="@+id/music_play_exit"
+        android:layout_alignEnd="@+id/music_play_exit"
+        android:layout_marginEnd="61dp" />
+
+    <ImageView
+        android:id="@+id/music_play_exit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_exit"
+        android:layout_gravity="center|right"
+        android:layout_marginEnd="11dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/music_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/music_name"
+        android:layout_alignStart="@+id/music_name"
+        android:text="设计模式" />
+
+
+</RelativeLayout>

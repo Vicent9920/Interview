@@ -2,11 +2,13 @@ package cn.com.luckytry.interview;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.v7.app.AppCompatDelegate;
 
 import org.litepal.LitePal;
 
+import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
@@ -29,7 +31,7 @@ public class MyApplication extends Application {
         } else if(mode == Configuration.UI_MODE_NIGHT_NO) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-
+        startService(new Intent(this, SpeechService.class));
     }
 
     public static Context getContext(){

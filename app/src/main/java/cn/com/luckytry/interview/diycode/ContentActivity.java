@@ -2,11 +2,15 @@ package cn.com.luckytry.interview.diycode;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -15,9 +19,11 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,14 +32,20 @@ import android.view.View;
 import android.webkit.WebResourceError;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.crud.DataSupport;
 import org.litepal.crud.callback.SaveCallback;
 
 import java.util.List;
 
 import cn.com.luckytry.interview.R;
+import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.bean.InterviewBean;
+import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.view.Kawaii_LoadingView;
@@ -58,6 +70,12 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     private TextView textView;
     private String url;
     private BottomSheetDialog mBottomSheetDialog;
+    private Toast toast;
+
+    /****************************************** 语音播放 ********************************************************/
+    private SpeechService mSpeechService;
+    private String content = null;
+    private int playState = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +86,11 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         tag = getIntent().getStringExtra("tag");
         name = getIntent().getStringExtra("name");
         setCollapsingToolbarLayoutTitle(name);
+        toast = Toast.makeText(this,"",Toast.LENGTH_SHORT);
+        bindService(new Intent(this,SpeechService.class),mServiceConnection,Context.BIND_AUTO_CREATE);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        EventBus.getDefault().register(this);
 
-        mLoadingView.startMoving();
-    }
 
 
     private void initView() {
@@ -192,8 +206,24 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
             }
         });
-
+        mWebView.setOnGetTextListener(new ShowTextWebView.OnGetTextListener() {
+            @Override
+            public void onGetText(String text) {
+                content = text;
+            }
+        });
     }
+    private void setCollapsingToolbarLayoutTitle(String title) {
+        mToolbarLayout.setTitle(title);
+        mToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppBar);
+        mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
+        mToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppBarPlus1);
+        mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBarPlus1);
+
+        textView.setText(tag);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -210,6 +240,14 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.action_more:
                 showShareDialog();
                 break;
+            case R.id.action_voice:
+                if(content == null){
+                    toast.setText("请页面加载完成后播放");
+                    toast.show();
+                }else{
+                    controlPlay();
+
+                }
 
             default:
                 break;
@@ -219,6 +257,36 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 控制播放
+     */
+    private void controlPlay() {
+        if(playState == -1){//停止状态
+            mSpeechService.synthesizeToFile(content,mBean.getId());
+            playState = 1;
+        }else if(playState == 1){//播放状态
+            mSpeechService.pausePayler();
+            playState++;
+        }else if(playState == 2){//暂停状态
+            mSpeechService.resumePlayer();
+            playState = 1;
+        }
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPlayStaty(Events<Integer> event) {
+        playState = event.content;
+    };
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+
+        mLoadingView.startMoving();
+    }
 
     private ImageView ivStar;
     private TextView tvStar;
@@ -267,29 +335,71 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
 
     @Override
-    protected void onStop() {
-        super.onStop();
-//        EventBus.getDefault().unregister(this);
+    protected void onPause() {
+        super.onPause();
+
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+    }
 
-    private void setCollapsingToolbarLayoutTitle(String title) {
-        mToolbarLayout.setTitle(title);
-        mToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppBar);
-        mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBar);
-        mToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppBarPlus1);
-        mToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppBarPlus1);
-
-        textView.setText(tag);
+    /**
+     * 准备退出
+     */
+    private void parpreBack() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("")
+                .setMessage("确定退出播放？")
+                .setPositiveButton("退出", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                        onBackPressed();
+                    }
+                })
+                .setNegativeButton("后台播放", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                    }
+                })
+                .show();
     }
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.fab_shar){
+        int id = v.getId();
+        if(id == R.id.fab_shar){
             sharLink();
-        }else
-        onBackPressed();
+        }else{
+
+            if(mSpeechService.isPlay()){
+                parpreBack();
+            }else{
+                onBackPressed();
+            }
+        }
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK && event.getAction()==KeyEvent.ACTION_DOWN){
+            if(mSpeechService.isPlay()){
+                parpreBack();
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     public void doClick(View view){
@@ -385,4 +495,18 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
         public abstract void onStateChanged(AppBarLayout appBarLayout, State state);
     }
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+            mSpeechService = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mSpeechService = ( (SpeechService.SpeechBinder)service).getService();
+
+        }
+    };
 }

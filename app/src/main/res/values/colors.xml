@@ -25,4 +25,7 @@
 
     <color name="progress_color">#00ff00</color>
     <color name="fab_color">#C3BED4</color>
+
+    <color name="main">#FF31C27C</color>
+    <color name="main_dark">#FF535353</color>
 </resources>

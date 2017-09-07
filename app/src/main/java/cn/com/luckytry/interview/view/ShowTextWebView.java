@@ -33,6 +33,7 @@ public class ShowTextWebView extends WebView{
     private boolean isLoad = true;
     private OnResultCall listener;
     private OnChangeListener changeListener;
+    private OnGetTextListener textListener;
     private boolean isJianShu = false;
 
     public ShowTextWebView(Context context) {
@@ -156,6 +157,7 @@ public class ShowTextWebView extends WebView{
                     getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
                     if(listener!=null){
                         listener.load(html);
+                        listener = null;
                     }
                 }
             });
@@ -191,12 +193,19 @@ public class ShowTextWebView extends WebView{
 
             try {
                 Document doc = Jsoup.parse(html);
+                String text = "";
 
                 if(isJianShu){
 //                    html = doc.getElementsByClass("content").html();
                     html = doc.select("div.content").first().html();
+                    text = doc.select("div.content").first().text();
                 }else{
                     html = doc.getElementsByTag("article").html();
+                    text = doc.getElementsByTag("article").text();
+                }
+                if(textListener!=null){
+                    textListener.onGetText(text);
+                    textListener = null;
                 }
                 html = html.trim();
                 loadValue(html);
@@ -220,5 +229,10 @@ public class ShowTextWebView extends WebView{
         void onProgressChanged(int newProgress);
         void onReceivedError(WebResourceError error);
     }
-
+    public void setOnGetTextListener(OnGetTextListener listener){
+        this.textListener = listener;
+    }
+    public interface OnGetTextListener{
+        void onGetText(String text);
+    }
 }
