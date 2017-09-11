@@ -31,6 +31,9 @@ import cn.com.luckytry.interview.bean.InterViewPath;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.WavMergeUtil;
 
+/**
+ * 合成音频到文件
+ */
 public class SynthesizeService extends Service {
 
     private ExecutorService singleThreadPool;
