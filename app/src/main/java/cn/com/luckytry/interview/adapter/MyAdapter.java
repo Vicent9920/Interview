@@ -13,7 +13,6 @@ import java.util.List;
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.diycode.ContentActivity;
-import cn.com.luckytry.interview.main.MainActivity;
 
 /**
  * Created by asus on 2017/9/4.
@@ -49,7 +48,7 @@ public class MyAdapter extends CommonAdapter<InterviewBean> {
                     intent.putExtra("tag", interviewBean.getTag());
                     mContext.startActivity(intent);
                 } else {
-                    toast.setText(interviewBean.getName() + " 作者暂未开发！");
+                    toast.setText(interviewBean.getName() + " 文章内容正在编写中！");
                     toast.show();
                 }
             }
