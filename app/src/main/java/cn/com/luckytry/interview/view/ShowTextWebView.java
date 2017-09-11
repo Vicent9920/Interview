@@ -203,7 +203,7 @@ public class ShowTextWebView extends WebView{
                     html = doc.getElementsByTag("article").html();
                     text = doc.getElementsByTag("article").text();
                 }
-                if(textListener!=null){
+                if(textListener!=null && text!=null){
                     textListener.onGetText(text);
                     textListener = null;
                 }

@@ -3,8 +3,10 @@ package cn.com.luckytry.interview.service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -111,6 +113,15 @@ public class SpeechService extends Service {
             }
         });
         mExecutors = Executors.newSingleThreadExecutor();
+
+        /**
+         * 注册广播接收者
+         * 功能：
+         * 监听通知栏按钮点击事件
+         */
+        IntentFilter filter = new IntentFilter("PlayService");
+        MyBroadCastReceiver receiver = new MyBroadCastReceiver();
+        registerReceiver(receiver, filter);
     }
 
 
@@ -315,7 +326,7 @@ public class SpeechService extends Service {
      */
     private void setParam(){
         // 清空参数
-//        mTts.setParameter(SpeechConstant.PARAMS, null);
+        mTts.setParameter(SpeechConstant.PARAMS, null);
         mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
         // 设置在线合成发音人
         mTts.setParameter(SpeechConstant.VOICE_NAME, "xiaoyu");
@@ -333,8 +344,6 @@ public class SpeechService extends Service {
         // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
         mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
-
-
 
     }
 
@@ -413,6 +422,27 @@ public class SpeechService extends Service {
         }
     }
 
+    private class MyBroadCastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("PlayService")) {
 
+                switch (intent.getIntExtra("BUTTON_NOTI", 0)) {
+                    case 1:
+                        LUtil.e("播放音乐");
+                        break;
+                    case 2:
+                        LUtil.e("退出");
+                        //取消通知栏
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
 
 }
