@@ -1,14 +1,18 @@
 package cn.com.luckytry.interview.service;
 
+
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,7 +34,6 @@ import com.iflytek.sunflower.FlowerCollector;
 import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -40,10 +43,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.bean.InterviewBean;
+import cn.com.luckytry.interview.diycode.ContentActivity;
 import cn.com.luckytry.interview.util.LUtil;
-import cn.com.luckytry.interview.util.WavMergeUtil;
 
 /**
  * 置于后台处理音频
@@ -63,7 +67,8 @@ public class SpeechService extends Service {
     private NotificationManager notificationManager;
     private SensorManager mSensorManager;
     private MediaPlayer mPlayer;
-
+    private String tag,name;
+    private boolean ttsIsPlay = false;
     /**
      * 初始化监听。
      */
@@ -119,7 +124,7 @@ public class SpeechService extends Service {
          * 功能：
          * 监听通知栏按钮点击事件
          */
-        IntentFilter filter = new IntentFilter("PlayService");
+        IntentFilter filter = new IntentFilter("SpeechService");
         MyBroadCastReceiver receiver = new MyBroadCastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -132,6 +137,109 @@ public class SpeechService extends Service {
         return new SpeechBinder();
     }
 
+//    /**
+//     * 将文本处理为语音
+//     * @param textInfo
+//     * @param id
+//     */
+//    public void synthesizeToFile(String textInfo,int id){
+//        final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
+//        List<InterViewPath> beans = DataSupport.where("beanId = ?", id + "").find(InterViewPath.class);
+//        final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
+//        count = 0;
+//        if(beans.size()>0){
+//            isFile = true;
+//            try {
+//                mPlayer.setDataSource(path);
+//                mPlayer.prepare();
+//                mPlayer.setLooping(false);
+//                mPlayer.start();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }else{
+//            isFile = false;
+//            final List<String> texts = getvalue(textInfo);
+//
+//            final String tempPath = Environment.getExternalStorageDirectory()+"/interview/temp";
+//            if(texts.size()==1){
+//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, path);
+//            }else
+//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
+//            int code = mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
+//                //开始播放
+//                @Override
+//                public void onSpeakBegin() {
+//                   sendMessage(1);
+//                }
+//                //合成进度
+//                @Override
+//                public void onBufferProgress(int i, int i1, int i2, String s) {
+//
+//                }
+//                //暂停播放
+//                @Override
+//                public void onSpeakPaused() {
+//                    sendMessage(2);
+//                }
+//                //继续播放
+//                @Override
+//                public void onSpeakResumed() {
+//                    sendMessage(1);
+//                }
+//                //播放进度
+//                @Override
+//                public void onSpeakProgress(int i, int i1, int i2) {
+//
+//                }
+//                //合成结束
+//                @Override
+//                public void onCompleted(SpeechError speechError) {
+//                    if(speechError == null){
+//                        if(texts.size()>=count){
+//                            mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
+//                            String path = tempPath+count+".wav";
+////                            int code = mTts.synthesizeToUri(texts.get(count), path, this);
+//                            int code = mTts.startSpeaking(texts.get(count), this);
+//                            count++;
+//                        }else{
+//                            sendMessage(-1);
+//                            if(texts.size()>1){
+//                                List<File> inputFiles = new ArrayList<>();
+//                                for (int i = 0; i < texts.size(); i++) {
+//                                    File file = new File(tempPath+i+".wav");
+//                                    inputFiles.add(file);
+//                                }
+//                                try {
+//                                    File outFile = new File(path);
+//                                    WavMergeUtil.mergeWav(inputFiles,outFile);
+////                                    WavMergeUtil.getAllAudio(SpeechService.this,inputFiles,Environment.getExternalStorageDirectory()+"/msc/myvoice.wav");
+//                                    Log.e(TAG, "onCompleted 音频保存结束: " );
+//                                    bean.setSpeechPath(path);
+//                                    bean.save();
+//
+//                                } catch (IOException e) {
+//                                    Log.e(TAG, "onCompleted: ",e );
+//                                }
+//                            }else{
+//                                bean.setSpeechPath(path);
+//                                bean.save();
+//
+//                            }
+//                        }
+//                    }
+//                }
+//                //异常接口，供测试时使用
+//                @Override
+//                public void onEvent(int i, int i1, int i2, Bundle bundle) {
+//
+//                }
+//            });
+//            count++;
+//        }
+//
+//    }
+
     /**
      * 将文本处理为语音
      * @param textInfo
@@ -139,12 +247,13 @@ public class SpeechService extends Service {
      */
     public void synthesizeToFile(String textInfo,int id){
         final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
+        String pathresult = getQueryResult(id);
         final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
         count = 0;
-        if(bean.getSpeechPath()!=null){
+        if(pathresult!=null){
             isFile = true;
             try {
-                mPlayer.setDataSource(path);
+                mPlayer.setDataSource(pathresult);
                 mPlayer.prepare();
                 mPlayer.setLooping(false);
                 mPlayer.start();
@@ -160,11 +269,12 @@ public class SpeechService extends Service {
                 mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, path);
             }else
                 mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
-            int code = mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
+            mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
                 //开始播放
                 @Override
                 public void onSpeakBegin() {
-                   sendMessage(1);
+                    sendMessage(1);
+                    ttsIsPlay = true;
                 }
                 //合成进度
                 @Override
@@ -175,11 +285,13 @@ public class SpeechService extends Service {
                 @Override
                 public void onSpeakPaused() {
                     sendMessage(2);
+                    ttsIsPlay = false;
                 }
                 //继续播放
                 @Override
                 public void onSpeakResumed() {
                     sendMessage(1);
+                    ttsIsPlay = true;
                 }
                 //播放进度
                 @Override
@@ -194,32 +306,11 @@ public class SpeechService extends Service {
                             mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
                             String path = tempPath+count+".wav";
 //                            int code = mTts.synthesizeToUri(texts.get(count), path, this);
-                            int code = mTts.startSpeaking(texts.get(count), this);
+                            mTts.startSpeaking(texts.get(count), this);
                             count++;
                         }else{
                             sendMessage(-1);
-                            if(texts.size()>1){
-                                List<File> inputFiles = new ArrayList<>();
-                                for (int i = 0; i < texts.size(); i++) {
-                                    File file = new File(tempPath+i+".wav");
-                                    inputFiles.add(file);
-                                }
-                                try {
-                                    File outFile = new File(path);
-                                    WavMergeUtil.mergeWav(inputFiles,outFile);
-//                                    WavMergeUtil.getAllAudio(SpeechService.this,inputFiles,Environment.getExternalStorageDirectory()+"/msc/myvoice.wav");
-                                    Log.e(TAG, "onCompleted 音频保存结束: " );
-                                    bean.setSpeechPath(path);
-                                    bean.save();
 
-                                } catch (IOException e) {
-                                    Log.e(TAG, "onCompleted: ",e );
-                                }
-                            }else{
-                                bean.setSpeechPath(path);
-                                bean.save();
-
-                            }
                         }
                     }
                 }
@@ -232,6 +323,27 @@ public class SpeechService extends Service {
             count++;
         }
 
+    }
+
+    /**
+     * 解析查询结果
+     * @param id
+     * @return
+     */
+    private String getQueryResult(int id) {
+        Uri userUri = InterViewPathProvider.PATH_CONTENT_URI;
+//        Cursor cursor = db.query("news", null, "commentcount>?", new String[]{"0"}, null, null, null);
+        String result = null;
+
+        Cursor pathCursor = getContentResolver().query(userUri, null, "beanId=?", new String[]{id+""}, null);
+        if(pathCursor!=null){
+            while (pathCursor.moveToNext()) {
+                result = pathCursor.getString(1);
+            }
+            pathCursor.close();
+        }
+
+        return  result;
     }
 
     /**
@@ -284,9 +396,9 @@ public class SpeechService extends Service {
      */
     public boolean isPlay(){
         if(isFile){
-            return true;
+            return mPlayer.isPlaying();
         }else{
-            return mTts.isSpeaking();
+            return ttsIsPlay;
         }
     }
 
@@ -351,13 +463,73 @@ public class SpeechService extends Service {
     /**
      * 通知栏设置
      */
-    private void setNotification() {
+    public void setNotification(String adress,String tag,String name) {
+        this.tag = tag;
+        this.name = name;
+        /**
+         * 该方法虽然被抛弃过时，但是通用！
+         */
+        Intent intent1 = new Intent(mContext, ContentActivity.class);
+        intent1.putExtra("url", adress);
+        intent1.putExtra("name", name);
+        intent1.putExtra("tag", tag);
+        PendingIntent pendingIntent = PendingIntent
+                .getActivity(this,
+                        0, intent1, 0);
+        remoteViews = new RemoteViews(getPackageName(),
+                R.layout.play_notification);
 
-/**
- * 该方法虽然被抛弃过时，但是通用！
- */
+        notification = new Notification(R.mipmap.logo,
+                "歌曲正在播放", System.currentTimeMillis());
+        notification.contentIntent = pendingIntent;///当点击消息时就会向系统发送openintent意图
+        notification.contentView = remoteViews;
+        //标记位，设置通知栏一直存在
+        notification.flags =Notification.FLAG_ONGOING_EVENT;
 
+        Intent intent = new Intent("SpeechService");
+        intent.putExtra("BUTTON_NOTI", 1);
+        PendingIntent preIntent = PendingIntent.getBroadcast(
+                this,
+                1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(
+                R.id.music_play_pre, preIntent);
+
+        intent.putExtra("BUTTON_NOTI", 2);
+        PendingIntent pauseIntent = PendingIntent.getBroadcast(
+                this,
+                2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(
+                R.id.music_play_exit, pauseIntent);
+
+
+
+        notificationManager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+
+        setRemoteViews(true);
     }
+
+
+    private void setRemoteViews(boolean state) {
+
+        try {
+            remoteViews.setTextViewText(R.id.music_tag,tag);
+            remoteViews.setTextViewText(R.id.music_name,name);
+            int srcId;
+            if(state){
+                srcId = R.drawable.ic_pause;
+            }else{
+                srcId = R.drawable.ic_play;
+            }
+            remoteViews.setImageViewResource(R.id.music_play_pre,srcId);
+            //通知栏更新
+            notificationManager.notify(6, notification);
+        } catch (Exception e) {
+            LUtil.e("setRemoteViews",e);
+            e.printStackTrace();
+        }
+    }
+
     private MediaPlayer getMediaPlayer(Context context) {
         MediaPlayer mediaplayer = new MediaPlayer();
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
@@ -422,19 +594,35 @@ public class SpeechService extends Service {
         }
     }
 
+
     private class MyBroadCastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("PlayService")) {
+            if (intent.getAction().equals("SpeechService")) {
 
                 switch (intent.getIntExtra("BUTTON_NOTI", 0)) {
                     case 1:
                         LUtil.e("播放音乐");
+
+                        if(isPlay()){
+                            pausePayler();
+                            LUtil.e("暂停");
+                            setRemoteViews(true);
+                        }else{
+                            resumePlayer();
+                            LUtil.e("继续");
+                            setRemoteViews(false);
+                        }
+
                         break;
                     case 2:
                         LUtil.e("退出");
-                        //取消通知栏
 
+                        //取消通知栏
+                        if(isPlay()){
+                            stopPlayer();
+                        }
+                        notificationManager.cancel(6);
                         break;
 
                     default:

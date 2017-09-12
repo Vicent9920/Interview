@@ -1,8 +1,11 @@
 package cn.com.luckytry.interview.service;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -17,8 +20,6 @@ import com.iflytek.cloud.SpeechUtility;
 import com.iflytek.cloud.SynthesizerListener;
 import com.iflytek.sunflower.FlowerCollector;
 
-import org.litepal.crud.DataSupport;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import cn.com.luckytry.interview.IDownloadInterface;
-import cn.com.luckytry.interview.bean.InterViewPath;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.WavMergeUtil;
 
@@ -117,6 +117,35 @@ public class SynthesizeService extends Service {
 
     }
 
+    /**
+     * 解析查询结果
+     * @param id
+     * @return
+     */
+    private String getQueryResult(int id) {
+        Uri userUri = InterViewPathProvider.PATH_CONTENT_URI;
+//        Cursor cursor = db.query("news", null, "commentcount>?", new String[]{"0"}, null, null, null);
+        String result = null;
+
+        Cursor pathCursor = getContentResolver().query(userUri, null, "beanId=?", new String[]{id+""}, null);
+        if(pathCursor!=null){
+            while (pathCursor.moveToNext()) {
+                result = pathCursor.getString(1);
+            }
+            pathCursor.close();
+        }
+
+        return  result;
+    }
+
+    private void saveValue(int id,String path) {
+        Uri pathUri = InterViewPathProvider.PATH_CONTENT_URI;
+        ContentValues values = new ContentValues();
+        values.put("beanId", id);
+        values.put("path", path);
+        getContentResolver().insert(pathUri, values);
+    }
+
     public class SynthesizeRunnable implements Runnable, SynthesizerListener {
 
         private int id;
@@ -125,21 +154,20 @@ public class SynthesizeService extends Service {
         private List<String> texts;
         private String tempPath = Environment.getExternalStorageDirectory()+"/interview/temp/temp";
         private String path;
-        private InterViewPath pathBean;
+
         public SynthesizeRunnable( int id,String content){
 
             this.id = id;
             this.content = content;
             path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
-            pathBean = new InterViewPath();
-            pathBean.setBeanId(id);
+
 
         }
 
         @Override
         public void run() {
-            List<InterViewPath> data = DataSupport.where("beanId = ?", id + "").find(InterViewPath.class);
-            if(data.size()>0){
+           getQueryResult(id);
+            if(getQueryResult(id)!=null){
                 return;
             }else{
 
@@ -206,15 +234,13 @@ public class SynthesizeService extends Service {
                             File outFile = new File(path);
                             WavMergeUtil.mergeWav(inputFiles,outFile);
 //                                    WavMergeUtil.getAllAudio(SpeechService.this,inputFiles,Environment.getExternalStorageDirectory()+"/msc/myvoice.wav");
-                            pathBean.setPath(path);
-                            pathBean.save();
+                            saveValue(id,path);
 
                         } catch (IOException e) {
 
                         }
                     }else{
-                        pathBean.setPath(path);
-                        pathBean.save();
+                        saveValue(id,path);
 
                     }
                 }

@@ -285,8 +285,13 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
      */
     private void controlPlay() {
         if(playState == -1){//停止状态
-            mSpeechService.synthesizeToFile(content,mBean.getId());
-            playState = 1;
+            try {
+                mSpeechService.synthesizeToFile(content,mBean.getId());
+                playState = 1;
+            } catch (Exception e) {
+                e.printStackTrace();
+                LUtil.e("controlPlay",e);
+            }
         }else if(playState == 1){//播放状态
             mSpeechService.pausePayler();
             playState++;
@@ -388,12 +393,15 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
                     public void onClick(DialogInterface dialog,
                                         int which) {
                         onBackPressed();
+                        mSpeechService.stopPlayer();
                     }
                 })
                 .setNegativeButton("后台播放", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog,
                                         int which) {
+                        onBackPressed();
+                        mSpeechService.setNotification(url,tag,name);
                     }
                 })
                 .show();

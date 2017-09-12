@@ -25,6 +25,11 @@
     <!-- 锁频唤醒权限 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <permission
+        android:name="cn.com.service.InterViewPathProvider"
+        android:protectionLevel="normal" />
+
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -33,10 +38,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <provider
+            android:name="cn.com.luckytry.interview.service.InterViewPathProvider"
+            android:authorities="cn.com.luckytry.interview.service"
+            android:permission="cn.com.service.InterViewPathProvider"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":Provider">
+
+        </provider>
+
         <activity
             android:name=".diycode.ContentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout"
-            android:launchMode="singleTask"
+            android:launchMode="singleInstance"
             android:theme="@style/AppTheme.TranslucentStatus" />
 
         <service
@@ -79,6 +95,8 @@
             android:process=":other">
 
         </service>
+
+
     </application>
 
 </manifest>
