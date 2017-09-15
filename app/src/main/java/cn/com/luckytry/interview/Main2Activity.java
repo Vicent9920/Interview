@@ -6,24 +6,28 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.RemoteViews;
 
 import cn.com.luckytry.interview.main.MainActivity;
 
 public class Main2Activity extends AppCompatActivity {
 
+    private WebView webView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        sendIntent();
+       webView = (WebView) findViewById(R.id.web_view);
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl("https://github.com/francistao/LearningNotes/blob/master/Part1/Android/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md");
     }
 
-    public void doClick(View view){
 
-
-    }
 
     private void sendIntent() {
         /**

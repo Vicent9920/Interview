@@ -9,10 +9,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -34,6 +32,7 @@ import com.iflytek.sunflower.FlowerCollector;
 import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -45,9 +44,11 @@ import java.util.concurrent.Executors;
 
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.Events;
+import cn.com.luckytry.interview.bean.InterViewPath;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.diycode.ContentActivity;
 import cn.com.luckytry.interview.util.LUtil;
+import cn.com.luckytry.interview.util.WavMergeUtil;
 
 /**
  * 置于后台处理音频
@@ -137,109 +138,6 @@ public class SpeechService extends Service {
         return new SpeechBinder();
     }
 
-//    /**
-//     * 将文本处理为语音
-//     * @param textInfo
-//     * @param id
-//     */
-//    public void synthesizeToFile(String textInfo,int id){
-//        final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
-//        List<InterViewPath> beans = DataSupport.where("beanId = ?", id + "").find(InterViewPath.class);
-//        final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
-//        count = 0;
-//        if(beans.size()>0){
-//            isFile = true;
-//            try {
-//                mPlayer.setDataSource(path);
-//                mPlayer.prepare();
-//                mPlayer.setLooping(false);
-//                mPlayer.start();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }else{
-//            isFile = false;
-//            final List<String> texts = getvalue(textInfo);
-//
-//            final String tempPath = Environment.getExternalStorageDirectory()+"/interview/temp";
-//            if(texts.size()==1){
-//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, path);
-//            }else
-//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
-//            int code = mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
-//                //开始播放
-//                @Override
-//                public void onSpeakBegin() {
-//                   sendMessage(1);
-//                }
-//                //合成进度
-//                @Override
-//                public void onBufferProgress(int i, int i1, int i2, String s) {
-//
-//                }
-//                //暂停播放
-//                @Override
-//                public void onSpeakPaused() {
-//                    sendMessage(2);
-//                }
-//                //继续播放
-//                @Override
-//                public void onSpeakResumed() {
-//                    sendMessage(1);
-//                }
-//                //播放进度
-//                @Override
-//                public void onSpeakProgress(int i, int i1, int i2) {
-//
-//                }
-//                //合成结束
-//                @Override
-//                public void onCompleted(SpeechError speechError) {
-//                    if(speechError == null){
-//                        if(texts.size()>=count){
-//                            mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
-//                            String path = tempPath+count+".wav";
-////                            int code = mTts.synthesizeToUri(texts.get(count), path, this);
-//                            int code = mTts.startSpeaking(texts.get(count), this);
-//                            count++;
-//                        }else{
-//                            sendMessage(-1);
-//                            if(texts.size()>1){
-//                                List<File> inputFiles = new ArrayList<>();
-//                                for (int i = 0; i < texts.size(); i++) {
-//                                    File file = new File(tempPath+i+".wav");
-//                                    inputFiles.add(file);
-//                                }
-//                                try {
-//                                    File outFile = new File(path);
-//                                    WavMergeUtil.mergeWav(inputFiles,outFile);
-////                                    WavMergeUtil.getAllAudio(SpeechService.this,inputFiles,Environment.getExternalStorageDirectory()+"/msc/myvoice.wav");
-//                                    Log.e(TAG, "onCompleted 音频保存结束: " );
-//                                    bean.setSpeechPath(path);
-//                                    bean.save();
-//
-//                                } catch (IOException e) {
-//                                    Log.e(TAG, "onCompleted: ",e );
-//                                }
-//                            }else{
-//                                bean.setSpeechPath(path);
-//                                bean.save();
-//
-//                            }
-//                        }
-//                    }
-//                }
-//                //异常接口，供测试时使用
-//                @Override
-//                public void onEvent(int i, int i1, int i2, Bundle bundle) {
-//
-//                }
-//            });
-//            count++;
-//        }
-//
-//    }
-
     /**
      * 将文本处理为语音
      * @param textInfo
@@ -247,13 +145,14 @@ public class SpeechService extends Service {
      */
     public void synthesizeToFile(String textInfo,int id){
         final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
-        String pathresult = getQueryResult(id);
+        List<InterViewPath> beans = DataSupport.where("beanId = ?", id + "").find(InterViewPath.class);
         final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
         count = 0;
-        if(pathresult!=null){
+        if(bean.getSpeechPath()!=null){
             isFile = true;
+            LUtil.e("mPlayer 开始播放");
             try {
-                mPlayer.setDataSource(pathresult);
+                mPlayer.setDataSource(path);
                 mPlayer.prepare();
                 mPlayer.setLooping(false);
                 mPlayer.start();
@@ -269,17 +168,17 @@ public class SpeechService extends Service {
                 mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, path);
             }else
                 mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
-            mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
+            int code = mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
                 //开始播放
                 @Override
                 public void onSpeakBegin() {
-                    sendMessage(1);
+                   sendMessage(1);
                     ttsIsPlay = true;
                 }
                 //合成进度
                 @Override
                 public void onBufferProgress(int i, int i1, int i2, String s) {
-
+                    LUtil.e("onBufferProgress"+i);
                 }
                 //暂停播放
                 @Override
@@ -296,13 +195,15 @@ public class SpeechService extends Service {
                 //播放进度
                 @Override
                 public void onSpeakProgress(int i, int i1, int i2) {
+                    //当播放进度达到100时，不会有此次回调
+                    //播放进度为99也不可靠，有时候有，有时候没有，甚至有时候会产生多次回调
 
                 }
                 //合成结束
                 @Override
                 public void onCompleted(SpeechError speechError) {
                     if(speechError == null){
-                        if(texts.size()>=count){
+                        if(texts.size() != 1 && texts.size() > count){
                             mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
                             String path = tempPath+count+".wav";
 //                            int code = mTts.synthesizeToUri(texts.get(count), path, this);
@@ -310,9 +211,32 @@ public class SpeechService extends Service {
                             count++;
                         }else{
                             sendMessage(-1);
+                            if(texts.size()>1){
+                                List<File> inputFiles = new ArrayList<>();
+                                for (int i = 0; i < texts.size(); i++) {
+                                    File file = new File(tempPath+i+".wav");
+                                    inputFiles.add(file);
+                                }
+                                try {
+                                    File outFile = new File(path);
+                                    WavMergeUtil.mergeWav(inputFiles,outFile);
+//                                    WavMergeUtil.getAllAudio(SpeechService.this,inputFiles,Environment.getExternalStorageDirectory()+"/msc/myvoice.wav");
 
+                                    bean.setSpeechPath(path);
+                                    bean.save();
+                                    ttsIsPlay = false;
+                                } catch (IOException e) {
+                                    Log.e(TAG, "onCompleted: ",e );
+                                }
+                            }else{
+                                bean.setSpeechPath(path);
+                                bean.save();
+                                ttsIsPlay = false;
+                                Log.e(TAG, "onCompleted 音频保存结束: " );
+                            }
                         }
                     }
+
                 }
                 //异常接口，供测试时使用
                 @Override
@@ -326,25 +250,110 @@ public class SpeechService extends Service {
     }
 
     /**
+     * 将文本处理为语音
+     * @param textInfo
+     * @param id
+     */
+//    public void synthesizeToFile(String textInfo,int id){
+//        final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
+//        String pathresult = getQueryResult(id);
+//        final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
+//        count = 0;
+//        if(pathresult!=null){
+//            isFile = true;
+//            try {
+//                mPlayer.setDataSource(pathresult);
+//                mPlayer.prepare();
+//                mPlayer.setLooping(false);
+//                mPlayer.start();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }else{
+//            isFile = false;
+//            final List<String> texts = getvalue(textInfo);
+//
+//            final String tempPath = Environment.getExternalStorageDirectory()+"/interview/temp";
+//            if(texts.size()==1){
+//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, path);
+//            }else
+//                mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
+//            mTts.startSpeaking(texts.get(count), new SynthesizerListener() {
+//                //开始播放
+//                @Override
+//                public void onSpeakBegin() {
+//                    sendMessage(1);
+//                    ttsIsPlay = true;
+//                }
+//                //合成进度
+//                @Override
+//                public void onBufferProgress(int i, int i1, int i2, String s) {
+//
+//                }
+//                //暂停播放
+//                @Override
+//                public void onSpeakPaused() {
+//                    sendMessage(2);
+//                    ttsIsPlay = false;
+//                }
+//                //继续播放
+//                @Override
+//                public void onSpeakResumed() {
+//                    sendMessage(1);
+//                    ttsIsPlay = true;
+//                }
+//                //播放进度
+//                @Override
+//                public void onSpeakProgress(int i, int i1, int i2) {
+//
+//                }
+//                //合成结束
+//                @Override
+//                public void onCompleted(SpeechError speechError) {
+//                    if(speechError == null){
+//                        if(texts.size()>=count){
+//                            mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, tempPath+count+".wav");
+//                            String path = tempPath+count+".wav";
+////                            int code = mTts.synthesizeToUri(texts.get(count), path, this);
+//                            mTts.startSpeaking(texts.get(count), this);
+//                            count++;
+//                        }else{
+//                            sendMessage(-1);
+//
+//                        }
+//                    }
+//                }
+//                //异常接口，供测试时使用
+//                @Override
+//                public void onEvent(int i, int i1, int i2, Bundle bundle) {
+//
+//                }
+//            });
+//            count++;
+//        }
+//
+//    }
+
+    /**
      * 解析查询结果
      * @param id
      * @return
      */
-    private String getQueryResult(int id) {
-        Uri userUri = InterViewPathProvider.PATH_CONTENT_URI;
-//        Cursor cursor = db.query("news", null, "commentcount>?", new String[]{"0"}, null, null, null);
-        String result = null;
-
-        Cursor pathCursor = getContentResolver().query(userUri, null, "beanId=?", new String[]{id+""}, null);
-        if(pathCursor!=null){
-            while (pathCursor.moveToNext()) {
-                result = pathCursor.getString(1);
-            }
-            pathCursor.close();
-        }
-
-        return  result;
-    }
+//    private String getQueryResult(int id) {
+//        Uri userUri = InterViewPathProvider.PATH_CONTENT_URI;
+////        Cursor cursor = db.query("news", null, "commentcount>?", new String[]{"0"}, null, null, null);
+//        String result = null;
+//
+//        Cursor pathCursor = getContentResolver().query(userUri, null, "beanId=?", new String[]{id+""}, null);
+//        if(pathCursor!=null){
+//            while (pathCursor.moveToNext()) {
+//                result = pathCursor.getString(1);
+//            }
+//            pathCursor.close();
+//        }
+//
+//        return  result;
+//    }
 
     /**
      * 发送消息
@@ -360,10 +369,12 @@ public class SpeechService extends Service {
      * 暂停播放
      */
     public void pausePayler(){
+        LUtil.e("pausePayler");
         if(isFile){
             mPlayer.pause();
         }else{
             mTts.pauseSpeaking();
+            ttsIsPlay = false;
         }
     }
 
@@ -371,10 +382,12 @@ public class SpeechService extends Service {
      * 继续播放
      */
     public void resumePlayer(){
+        LUtil.e("resumePlayer");
         if(isFile){
             mPlayer.start();
         }else{
             mTts.resumeSpeaking();
+            ttsIsPlay = true;
         }
     }
 
@@ -386,7 +399,7 @@ public class SpeechService extends Service {
             mPlayer.stop();
         }else{
             mTts.stopSpeaking();
-
+            ttsIsPlay = false;
         }
     }
 

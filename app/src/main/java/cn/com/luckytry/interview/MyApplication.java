@@ -32,7 +32,7 @@ public class MyApplication extends Application {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
         startService(new Intent(this, SpeechService.class));
-//        startService(new Intent(this, SynthesizeService.class));
+
     }
 
     public static Context getContext(){

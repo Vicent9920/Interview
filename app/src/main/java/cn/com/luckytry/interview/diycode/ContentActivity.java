@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
@@ -43,12 +42,10 @@ import org.litepal.crud.callback.SaveCallback;
 
 import java.util.List;
 
-import cn.com.luckytry.interview.IDownloadInterface;
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.Events;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.service.SpeechService;
-import cn.com.luckytry.interview.service.SynthesizeService;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.view.Kawaii_LoadingView;
@@ -79,6 +76,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     private SpeechService mSpeechService;
     private String content = null;
     private int playState = -1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,24 +212,6 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
             public void onGetText(String text) {
                 content = text;
 
-                serviceConnection = new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {
-                        IDownloadInterface mDownloadInterface = IDownloadInterface.Stub.asInterface(service);
-                        try {
-                            int result = mDownloadInterface.synthesizeToFile(mBean.getId(),content);
-                            LUtil.e("连接跨进程"+result);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                            LUtil.e("连接跨进程",e);
-                        }
-                    }
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-
-                    }
-                };
-                bindService(new Intent(ContentActivity.this, SynthesizeService.class),serviceConnection,Context.BIND_AUTO_CREATE);
 
             }
         });
@@ -378,7 +358,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
-        unbindService(serviceConnection);
+
     }
 
     /**
@@ -510,7 +490,7 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     };
 
 
-    private ServiceConnection serviceConnection ;
+
 
     abstract static class AppBarStateChangeListener implements AppBarLayout.OnOffsetChangedListener {
         public enum State {
