@@ -2,23 +2,16 @@ package cn.com.luckytry.interview.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import cn.com.luckytry.interview.MyApplication;
-import cn.com.luckytry.interview.util.Const;
-import cn.com.luckytry.interview.util.LUtil;
 import cn.com.luckytry.interview.util.NetUtil;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
@@ -26,15 +19,12 @@ import cn.com.luckytry.interview.util.SharedPrefsUtil;
  * Created by 魏兴 on 2017/8/22.
  */
 
-public class ShowTextWebView extends WebView{
+public class ShowTextWebView extends NestedWebView{
 
     private static final String TAG = "ShowTextWebView";
     private Context context;
     private boolean isLoad = true;
-    private OnResultCall listener;
     private OnChangeListener changeListener;
-    private OnGetTextListener textListener;
-    private boolean isJianShu = false;
 
     public ShowTextWebView(Context context) {
         super(context);
@@ -70,8 +60,6 @@ public class ShowTextWebView extends WebView{
 //开启DomStorage缓存
         this.getSettings().setDomStorageEnabled(true);
 
-        //获取 html
-        this.addJavascriptInterface(new InJavaScriptLocalObj(), "local_obj");
 
 //配置权限
         setWebChromeClient(new WebChromeClient() {
@@ -100,31 +88,7 @@ public class ShowTextWebView extends WebView{
 
 
         setWebViewClient(new WebViewClient(){
-            // 网页加载结束
-            @Override
-            public void onPageFinished(final WebView view, String url) {
-                super.onPageFinished(view, url);
-                if(isLoad){
 
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    view.loadUrl("javascript:window.local_obj.showSource('<head>'+"
-                                            + "document.getElementsByTagName('body')[0].innerHTML+'</head>');");
-
-                                }
-                            });
-                        }
-                    },000);
-
-                    isLoad = false;
-                }
-
-            }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
@@ -140,87 +104,6 @@ public class ShowTextWebView extends WebView{
 
     }
 
-
-    private void loadValue( final String html){
-        try {
-
-//        if(listener!=null){
-//            listener.load(source);
-//        }
-
-            post(new Runnable() {
-                @Override
-                public void run() {
-
-                    String source = Const.getData(getContext(),html);
-                    loadDataWithBaseURL(null, source, "text/html", "utf-8",null);
-                    getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-                    if(listener!=null){
-                        listener.load(html);
-                        listener = null;
-                    }
-                }
-            });
-
-        } catch (Exception e) {
-            LUtil.e(TAG,"loadValueException",e);
-        }
-    }
-
-    /**
-     * 修改标志位，直接加载内容不再获取网页文本
-     */
-    public void isShowSource(){
-        isLoad = false;
-    }
-
-    /**
-     * 修改标志位，简书网页爬去因素不一样
-     */
-    public void isJianShu(){
-        isJianShu = true;
-    }
-
-    private class InJavaScriptLocalObj {
-        /**
-         * 获取要解析 WebView 加载对应的 Html 文本
-         *
-         * @param html WebView 加载对应的 Html 文本
-         */
-        @android.webkit.JavascriptInterface
-        public void showSource(String html) {
-
-
-            try {
-                Document doc = Jsoup.parse(html);
-                String text = "";
-
-                if(isJianShu){
-//                    html = doc.getElementsByClass("content").html();
-                    html = doc.select("div.content").first().html();
-                    text = doc.select("div.content").first().text();
-                }else{
-                    html = doc.getElementsByTag("article").html();
-                    text = doc.getElementsByTag("article").text();
-                }
-                if(textListener!=null && text!=null){
-                    textListener.onGetText(text);
-                    textListener = null;
-                }
-                html = html.trim();
-                loadValue(html);
-            } catch (Exception e) {
-                LUtil.e(TAG,"showSourceException",e);
-            }
-
-        }
-    }
-    public void setResultCall(OnResultCall call){
-        this.listener = call;
-    }
-    public interface OnResultCall{
-        void load(String html);
-    }
     public void setOnChangeListener(OnChangeListener listener){
         this.changeListener = listener;
     }
@@ -229,10 +112,5 @@ public class ShowTextWebView extends WebView{
         void onProgressChanged(int newProgress);
         void onReceivedError(WebResourceError error);
     }
-    public void setOnGetTextListener(OnGetTextListener listener){
-        this.textListener = listener;
-    }
-    public interface OnGetTextListener{
-        void onGetText(String text);
-    }
+
 }

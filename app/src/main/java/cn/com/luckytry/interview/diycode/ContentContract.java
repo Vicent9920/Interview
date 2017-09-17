@@ -2,6 +2,9 @@ package cn.com.luckytry.interview.diycode;
 
 import cn.com.luckytry.interview.BasePresenter;
 import cn.com.luckytry.interview.BaseView;
+import cn.com.luckytry.interview.bean.InterviewBean;
+import cn.com.luckytry.interview.service.SpeechService;
+import cn.com.luckytry.interview.view.ShowTextWebView;
 
 /**
  * Content
@@ -11,19 +14,30 @@ import cn.com.luckytry.interview.BaseView;
 public interface ContentContract {
 
     interface View extends BaseView<Presenter> {
-
-        void showLoading(String info);
-
         void showResult();
+        void onTitle(int state);
+        void showSource(String source);
 
-        void updatePart(int current,int last);
-        void smoothMoveToPosition(int n);
+
+
 
     }
 
     interface Presenter extends BasePresenter {
-        void changeTheme();
-        void onScrolled(int position);
-        void getPosition(String tag);
+        void setSpeechService(SpeechService services);
+        void controlPlay();
+        void copyLink();
+        boolean addStar();
+        void openByBrowser ();
+        void copyText();
+        void stopPlayer();
+        void sharLink(String name);
+        boolean isPlay();
+        boolean isStar();
+        boolean isOnLoad();
+        void sendNotification(String tag,String name);
+        ShowTextWebView.OnChangeListener getOnChangeListener();
+        InterviewBean getmBean(String url);
+        ContentPresenter.AppBarStateChangeListener getAppBarStateChangeListener();
     }
 }

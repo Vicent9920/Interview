@@ -30,6 +30,7 @@ public class Const {
         } else if(mode == Configuration.UI_MODE_NIGHT_NO) {//日间模式
             bgcolor = "background: #f0f0f0;\n";
         }
+
         String source = "<!DOCTYPE html>\n"
                 +"<html lang='en'>" +
                 "<head><meta charset='UTF-8'>" +
@@ -40,6 +41,7 @@ public class Const {
                        bgcolor +
                 "       color: #222527;\n" +
                 "       font-family: \"RobotoDraft\", \"Roboto\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n" +
+                "       padding-bottom: 10px;"+
                 "       }\n" +
                 "       pre, code { \n" +
 

@@ -708,5 +708,6 @@ public class Kawaii_LoadingView extends View{
 
         // 通过标记位来设置
         mAllowRoll = false;
+        mAnimatorSet.cancel();
     }
 }

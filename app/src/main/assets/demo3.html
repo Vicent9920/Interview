@@ -1,167 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
-    <title>SONIC</title>
-    <style type="text/css">
-                body{
-                    background: #6F6F6F;
-                color: #222527;
-                font-family:
-                }
-                pre, code { 
-
-                padding: 5px 10px;
-                line-height:102px;
-                border: 1px solid #eee;  
-                white-space:-moz-pre-wrap; 
-                white-space:-pre-wrap; 
-                
-                word-wrap:break-word; 
-                
-                white-space: pre-wrap; 
-                
-                word-break:break-all; 
-                
-                }
-
-                article {
-				width: 100%;
-				position: fixed;
-				top: 0;
-				bottom: 0;
-				overflow: auto;
-			}
-                </style>
-</head>
-<body>
-	<article class='markdown-body entry-content' itemprop='text'>
-			 <div class="content" data-note-content="">
-		   <blockquote><p>原文链接：<a href="http://bxbxbai.github.io/2015/12/13/retrofit2-analysis/" target="_blank">http://bxbxbai.github.io/2015/12/13/retrofit2-analysis/</a></p></blockquote>
-	 <p>开发Android App肯定会使用Http请求与服务器通信，上传或下载数据等。目前开源的Http请求工具也有很多，比如Google开发的Volley，loopj的Android Async Http，Square开源的OkHttp或者Retrofit等。</p>
-	 <p>我觉得<a href="http://square.github.io/retrofit/" target="_blank">Retrofit</a> 无疑是这几个当中最好用的一个，设计这个库的思路很特别而且巧妙。Retrofit的代码很少，花点时间读它的源码肯定会收获很多</p>
-	 <p><strong>本文的源码分析基于Retrofit 2，和Retrofit 1.0的Api有较大的不同</strong>， 本文主要分为几部分：0、Retrofit 是什么，1、Retrofit怎么用，2、Retrofit的原理是什么，3、我的心得与看法</p>
-	 <p>&lt;!--more--&gt;
-	 </p>
-	 <h2>0 Retrofit是什么</h2>
-	 <p>来自Retrofit官网的介绍：</p>
-	 <blockquote><p>A type-safe HTTP client for Android and Java</p></blockquote>
-	 <p>简单的说它是一个基于OkHttp的RESTFUL Api请求工具，从功能上来说和Google的Volley功能上很相似，但是使用上很不相似。</p>
-	 <p>Volley使用上更加原始而且符合使用者的直觉，当App要发送一个Http请求时，你需要先创建一个<code>Request</code>对象，指定这个Request用的是GET、POST或其他方法，一个api 地址，一个处理response的回调，如果是一个POST请求，那么你还需要给这个<code>Request</code>对象设置一个body，有时候你还需要自定义添加Header什么的，然后将这个<code>Request</code>对象添加到<code>RequestQueue</code>中，接下去检查Cache以及发送Http请求的事情，Volley会帮你处理。如果一个App中api不同的api请求很多，这样代码就会很难看。</p>
-	 <p>而Retrofit可以让你简单到<strong>调用一个Java方法的方式去请求一个api</strong>，这样App中的代码就会很简洁方便阅读</p>
-	 <h2>1 Retrofit怎么用</h2>
-	 <p>虽然Retrofit官网已经说明了，我还是要按照我的思路说一下它的使用方法</p>
-	 <p>比如你要请求这么一个api，查看知乎专栏的某个作者信息：</p>
-	 <blockquote><p><a href="https://zhuanlan.zhihu.com/api/columns/%7Buser%7D" target="_blank">https://zhuanlan.zhihu.com/api/columns/{user}</a> </p></blockquote>
-	 <p>首先，你需要创建一个<code>Retrofit</code>对象，并且指定api的域名：</p>
-	 <pre><code>public static final String API_URL = "https://zhuanlan.zhihu.com";
-	 
-	 Create a very simple REST adapter which put.println("name： " + author.getName());
-		 }
-		 @Override
-		 public void onFailure(Throwable t) {
-		 }
-	 });</code></pre>
-	 <p>看到没，<code>Retrofit</code>只要<strong>创建一个接口来描述Http请求</strong>，然后可以让我们<strong>可以像调用Java方法一样请求一个Api</strong>，是不是觉得很神奇，很不可思议！！</p>
-	 <h1>2 Retrofit的原理</h1>
-	 <p>从上面Retrofit的使用来看，Retrofit就是充当了一个适配器（Adapter）的角色：<strong>将一个Java接口<em>翻译</em>成一个Http请求，然后用OkHttp去发送这个请求</strong></p>
-	 <p>Volley描述一个HTTP请求是需要创建一个<code>Request</code>对象，而执行这个请求呢，就是把这个请求对象放到一个队列中，在网络线程中用<code>HttpUrlConnection</code>去请求</p>
-	 <p>问题来了：</p>
-	 <p><strong>Retrofit是怎么做的呢？</strong></p>
-	 <p>答案很简单，就是：<strong>Java的动态代理</strong></p>
-	 <h2>动态代理</h2>
-	 <p>我刚开始看Retrofit的代码，我对下面这句代码感到很困惑：</p>
-	 <pre><code>ZhuanLanApi api = retrofit.create(ZhuanLanApi.class);</code></pre>
-	 <p>我给Retrofit对象传了一个<code>ZhuanLanApi</code>接口的Class对象，怎么又返回一个<code>ZhuanLanApi</code>对象呢？进入<code>create</code>方法一看，没几行代码，但是<strong>我觉得这几行代码就是Retrofit的精妙的地方</strong>：</p>
-	 <pre><code>/** Create an implementation of the API defined by the {@code service} interface. */
-	 public &lt;T&gt; T create(final Class&lt;T&gt; service) {
-	   Utils.validateServiceInterface(service);
-	   if (validateEagerly) {
-		  eagerlyValidateMethods(service);
-	   }
-	   return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class&lt;?&gt;[] { service },
-		 new InvocationHandler() {
-		   private final Platform platform = Platform.get();
-	 
-		   @Override public Object invoke(Object proxy, Method method, Object... args)
-			   throws Throwable {
-			 // If the method is a method from Object then defer to normal invocation.
-			 if (method.getDeclaringClass() == Object.class) {
-			   return method.invoke(this, args);
-			 }
-			 if (platform.isDefaultMethod(method)) {
-			   return platform.invokeDefaultMethod(method, service, proxy, args);
-			 }
-			 ServiceMethod serviceMethod = loadServiceMethod(method);
-			 OkHttpCall okHttpCall = new OkHttpCall&lt;&gt;(serviceMethod, args);
-			 return serviceMethod.callAdapter.adapt(okHttpCall);
-		   }
-		 });</code></pre>
-	 <p>  }</p>
-	 <p><code>create</code>方法就是返回了一个<code>Proxy.newProxyInstance</code>动态代理对象。那么问题来了...</p>
-	 <p><strong>动态代理是个什么东西？</strong></p>
-	 <p>看Retrofit代码之前我知道Java动态代理是一个很重要的东西，比如在Spring框架里大量的用到，但是它有什么用呢？</p>
-	 <p><strong>Java动态代理就是给了程序员一种可能：当你要调用某个Class的方法前或后，插入你想要执行的代码</strong></p>
-	 <p>比如你要执行某个操作前，你必须要判断这个用户是否登录，或者你在付款前，你需要判断这个人的账户中存在这么多钱。这么简单的一句话，我相信可以把一个不懂技术的人也讲明白Java动态代理是什么东西了。</p>
-	 <h2>为什么要使用动态代理</h2>
-	 <p>你看上面代码，获取数据的代码就是这句:</p>
-	 <pre><code>Call&lt;ZhuanLanAuthor&gt; call = api.getAuthor("qinchao");</code></pre>
-	 <p>上面<code>api</code>对象其实是一个动态代理对象，并不是一个真正的<code>ZhuanLanApi</code>接口的<code>implements</code>产生的对象，当<code>api</code>对象调用<code>getAuthor</code>方法时会被动态代理拦截，然后调用<code>Proxy.newProxyInstance</code>方法中的<code>InvocationHandler</code>对象，它的<code>invoke</code>方法会传入3个参数：</p>
-	 <ul>
-	 <li>Object proxy: 代理对象，不关心这个</li>
-	 <li>Method method：调用的方法，就>
-	 <p>这个接口就是retrofit请求数据返回的接口，只有两个方法</p>
-	 <ul>
-	 <li><code>void onResponse(Response&lt;T&gt; response);</code></li>
-	 <li><code>void onFailure(Throwable t);</code></li>
-	 </ul>
-	 <h3><code>Converter&lt;F, T&gt;</code></h3>
-	 <p>这个接口主要的作用就是将HTTP返回的数据解析成Java对象，主要有Xml、Gson、protobuf等等，你可以在创建<code>Retrofit</code>对象时添加你需要使用的<code>Converter</code>实现（看上面创建Retrofit对象的代码）</p>
-	 <h3><code>Call&lt;T&gt;</code></h3>
-	 <p>这个接口主要的作用就是发送一个HTTP请求，Retrofit默认的实现是<code>OkHttpCall&lt;T&gt;</code>，你可以根据实际情况实现你自己的Call类，这个设计和Volley的<code>HttpStack</code>接口设计的思想非常相似，子类可以实现基于<code>HttpClient</code>或<code>HttpUrlConnetction</code>的HTTP请求工具，<strong>这种设计非常的插件化，而且灵活</strong></p>
-	 <h3><code>CallAdapter&lt;T&gt;</code></h3>
-	 <p>上面说到过，<code>CallAdapter</code>中属性只有<code>responseType</code>一个，还有一个<code>&lt;R&gt; T adapt(Call&lt;R&gt; call)</code>方法，这个接口的实现类也只有一个，<code>DefaultCallAdapter</code>。这个方法的主要作用就是将<code>Call</code>对象转换成另一个对象，可能是为了支持RxJava才设计这个类的吧</p>
-	 <h2>Retrofit的运行过程</h2>
-	 <p>上面讲到<code>ZhuanLanApi api = retrofit.create(ZhuanLanApi.class);</code>代码返回了一个动态代理对象，而执行<code>Call&lt;ZhuanLanAuthor&gt; call = api.getAuthor("qinchao");</code>代码时返回了一个<code>OkHttpCall</code>对象，拿到这个<code>Call</code>对象才能执行HTTP请求</p>
-	 <p>上面<code>api</code>对象其实是一个动态代理对象，并不是一个真正的<code>ZhuanLanApi</code>接口的<code>implements</code>产生的对象，当<code>api</code>对象调用<code>getAuthor</code>方法时会被动态代理拦截，然后调用<code>Proxy.newProxyInstance</code>方法中的<code>InvocationHandler</code>对象， 创建一个<code>ServiceMethod</code>对象</p>
-	 <pre><code>ServiceMethod serviceMethod = loadServiceMethod(method);
-	 OkHttpCall okHttpCall = new OkHttpCall&lt;&gt;(serviceMethod, args);
-	 return serviceMethod.callAdapter.adapt(okHttpCall);</code></pre>
-	 <h3>创建ServiceMethod</h3>
-	 <p>刚才说到，<code>ServiceMethod</code>就像是一个中央处理器，具体来看一下创建这个<code>ServiceMethod</code>的过程是怎么样的</p>
-	 <p>第一步，获取到上面说到的3个接口对象：</p>
-	 <pre><code>callAdapter = createCallAdapter();
-	 responseType = callAdapter.responseType();
-	 responseConverter = createResponseConverter();</code></pre>
-	 <p>第二步，解析Method的注解，主要就是获取Http请求的方法，比如是GET还是POST还是其他形式，如果没有，程序就会报错，还会做一系列的检查，比如如果在方法上注解了<code>@Multipart</code>，但是Http请求方法是GET，同样也会报错。因此，在注解Java方法是需要严谨</p>
-	 <pre><code>for (Annotation annotation : methodAnnotations) {
-		 parseMethodAnnotation(annotation);
-	 }
-	 
-	 if (httpMethod == null) {
-		throw methodError("HTTP method annotation is required (e.g., @GET, @POST, etc.).");
-	 }</code></pre>
-	 <p>第三步，比如上面api中带有一个参数<code>{user}</code>，这是一个占位符，而真实的参数值在Java方法中传入，那么Retrofit会使用一个<code>ParameterHandler</code>来进行替换：</p>
-	 <pre><code>int parameterCount = parameterAnnotationsArray.length;
-	 parameterHandlers = new ParameterHandler&lt;?&gt;[parameterCount];</code></pre>
-	 <p>最后，<code>ServiceMethod</code>会做其他的检查，比如用了<code>@FormUrlEncoded</code>注解，那么方法参数中必须至少有一个<code>@Field</code>或<code>@FieldMap</code></p>
-	 <h3>执行Http请求</h3>
-	 <p>之前讲到，<code>OkHttpCall</code>是实现了<code>Call</code>接口的，并且是真正调用<code>ate())
-	   .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-	   .build();</code></pre>
-	 <p>上面代码创建了一个<code>Retrofit</code>对象，支持Proto和Gson两种数据格式，并且还支持RxJava</p>
-	 <h1>4 最后</h1>
-	 <p><strong>Retrofit非常巧妙的用注解来描述一个HTTP请求，将一个HTTP请求抽象成一个Java接口，然后用了Java动态代理的方式，动态的将这个接口的注解“翻译”成一个HTTP请求，最后再执行这个HTTP请求</strong></p>
-	 <p>Retrofit的功能非常多的依赖Java反射，代码中其实还有很多细节，比如异常的捕获、抛出和处理，大量的Factory设计模式（为什么要这么多使用Factory模式？）</p>
-	 <p>Retrofit中接口设计的恰到好处，在你创建<code>Retrofit</code>对象时，让你有更多更灵活的方式去处理你的需求，比如使用不同的<code>Converter</code>、使用不同的<code>CallAdapter</code>，这也就提供了你使用RxJava来调用Retrofit的可能</p>
-	 <p>我也慢慢看了<a href="http://square.github.io/picasso/" target="_blank">Picasso</a>和Retrofit的代码了，收获还是很多的，也更加深入的理解面向接口的编程方法，这个写代码就是<strong>好的代码就是依赖接口而不是实现</strong>最好的例子</p>
-	 <p>好感谢开源的世界，让我能读到大牛的代码。我一直觉得一个人如果没有读过好的代码是不太可能写出好代码的。什么是好的代码？像Picasso和Retrofit这样的就是好的代码，扩展性强、低耦合、插件化</p>
-	 
-		 </div>
-	
-</article>
-</body>
-</html>
+<html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<meta http-equiv='X-UA-Compatible' ><style type="text/css">
+       body{
+ background: #f0f0f0;
+        color: #222527;
+        font-family: "RobotoDraft", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        pre, code {
+            padding: 5px 10px;
+            line-height:102px
+            border: 1px solid #eee;
+            white-space:-moz-pre-wrap; /* Mozilla, since 1999 */
+            white-space:-pre-wrap; /* Opera 4-6 */
+            white-space:-o-pre-wrap; /* Opera 7 */
+            word-wrap:break-word; /* Internet Explorer 5.5+ */
+            white-space: pre-wrap; /* Firefox */
+            word-break:break-all;
+        }
+ article {
+ 				width: 100%;
+ 				position: fixed;
+ 				top: 0;
+ 				bottom: 0;
+ 				overflow: auto;
+ 			}    </style></head><body><article class='markdown-body entry-content' itemprop='text'><h2><a id="user-content-自定义控件" class="anchor" href="#自定义控件" aria-hidden="true">
+	<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewbox="0 0 16 16" width="16">
+		<path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+	</svg></a>#自定义控件</h2>
+	<p>自定义View的步骤：</p>
+	<ul>
+		<li>自定义View的属性</li>
+		<li>在View的构造方法中获得我们自定义View的步骤</li>
+		<li>［3.重写onMeasure］(不必须)</li>
+		<li>重写onDraw</li>
+	</ul></article></body></html>

@@ -1,9 +1,9 @@
 package cn.com.luckytry.interview;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.support.multidex.MultiDexApplication;
 import android.support.v7.app.AppCompatDelegate;
 
 import org.litepal.LitePal;
@@ -16,7 +16,7 @@ import cn.com.luckytry.interview.util.SharedPrefsUtil;
  * Created by 魏兴 on 2017/8/24.
  */
 
-public class MyApplication extends Application {
+public class MyApplication extends MultiDexApplication {
 
     private static Context mContext;
     @Override

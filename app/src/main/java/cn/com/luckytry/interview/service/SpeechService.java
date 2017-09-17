@@ -44,7 +44,6 @@ import java.util.concurrent.Executors;
 
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.bean.Events;
-import cn.com.luckytry.interview.bean.InterViewPath;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.diycode.ContentActivity;
 import cn.com.luckytry.interview.util.LUtil;
@@ -145,7 +144,7 @@ public class SpeechService extends Service {
      */
     public void synthesizeToFile(String textInfo,int id){
         final InterviewBean bean = DataSupport.find(InterviewBean.class,id);
-        List<InterViewPath> beans = DataSupport.where("beanId = ?", id + "").find(InterViewPath.class);
+
         final String path = Environment.getExternalStorageDirectory()+"/interview/specch/voice_"+id+".wav";
         count = 0;
         if(bean.getSpeechPath()!=null){

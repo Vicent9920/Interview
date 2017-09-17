@@ -8,7 +8,6 @@
 
     <list>
         <mapping class="cn.com.luckytry.interview.bean.InterviewBean" />
-        <mapping class="cn.com.luckytry.interview.bean.InterViewPath"/>
     </list>
 
 

@@ -39,6 +39,7 @@ public class MainPresenter implements MainContract.Presenter{
     private int lastIndex = -1;
     @Override
     public void start() {
+
         data = DataSupport.findAll(InterviewBean.class);
         if(data.size()==0){
             mView.showLoading(mView.getContext().getResources().getString(R.string.main_loading));
@@ -183,6 +184,7 @@ public class MainPresenter implements MainContract.Presenter{
     @Override
     public void onDestory() {
         mView = null;
+
     }
 
 
@@ -234,4 +236,6 @@ public class MainPresenter implements MainContract.Presenter{
         }
         return -1;
     }
+
+
 }

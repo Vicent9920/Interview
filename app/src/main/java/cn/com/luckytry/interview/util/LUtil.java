@@ -2,13 +2,15 @@ package cn.com.luckytry.interview.util;
 
 import android.util.Log;
 
+import cn.com.luckytry.interview.BuildConfig;
+
 /**
  * 日志管理类
  * Created by 魏兴 on 2017/6/26.
  */
 
 public class LUtil {
-    public static boolean isDebug = true;// 是否需要打印bug，可以在application的onCreate函数里面初始化
+    public static boolean isDebug = BuildConfig.DEBUG;// 是否需要打印bug，可以在application的onCreate函数里面初始化
     private static final String TAG = "Chopsticks";
 
     // 下面四个是默认tag的函数
