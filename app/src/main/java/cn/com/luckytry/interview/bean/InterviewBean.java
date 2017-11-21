@@ -20,7 +20,7 @@ public class InterviewBean extends DataSupport {
     private String name;
     //网址
     private String adress;
-    //文章内容
+    //文章(html)内容
     private String content;
     //是否可加载
     private boolean isCanLoad;
@@ -30,7 +30,8 @@ public class InterviewBean extends DataSupport {
     private boolean isValidContent;
     //语音文件地址
     private String speechPath;
-
+    //需要合成的语音文本
+    private String text;
     public int getId() {
         return id;
     }
@@ -113,5 +114,13 @@ public class InterviewBean extends DataSupport {
 
     public void setSpeechPath(String speechPath) {
         this.speechPath = speechPath;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

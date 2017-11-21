@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_enabled="false" android:drawable="@color/colorselected"></item>
-    <item android:drawable="@color/colorBaseBackground"></item>
+    <item android:state_enabled="false" android:drawable="@color/part_selected_bg"></item>
+    <item android:drawable="@color/part_defult_bg"></item>
 </selector>

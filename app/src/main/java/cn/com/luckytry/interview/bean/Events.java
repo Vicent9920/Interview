@@ -6,7 +6,6 @@ package cn.com.luckytry.interview.bean;
  */
 
 public class Events<T> {
-
     public T content;
     public  <O> Events<O> setContent(O t) {
         Events<O> events = new Events<>();

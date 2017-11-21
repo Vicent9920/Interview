@@ -91,6 +91,5 @@
         <item name="android:textColor">@drawable/part_textcolor_bg</item>
         <item name="android:onClick">doClick</item>
 
-
     </style>
 </resources>

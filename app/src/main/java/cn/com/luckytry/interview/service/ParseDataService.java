@@ -18,10 +18,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.bmob.v3.BmobBatch;
+import cn.bmob.v3.BmobObject;
+import cn.bmob.v3.datatype.BatchResult;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.QueryListListener;
+import cn.com.luckytry.interview.bean.InterViewInfo;
 import cn.com.luckytry.interview.bean.InterviewBean;
 import cn.com.luckytry.interview.util.LUtil;
 
 public class ParseDataService extends Service {
+    private static final String TAG = "ParseDataService";
     public ParseDataService() {
     }
 
@@ -31,7 +38,7 @@ public class ParseDataService extends Service {
         super.onCreate();
         List<InterviewBean> data = DataSupport.findAll(InterviewBean.class);
         if(data.size() == 0){
-            String value = getDataFromAssetsFile("main.html");
+            String value = getDataFromAssetsFile("InterView/main.html");
             parseValue(value);
         }
     }
@@ -50,16 +57,14 @@ public class ParseDataService extends Service {
                 Element tagP = element.getElementsByTag("p").first();
                 if(tagP==null){
                     String href = element.getElementsByTag("a").first().attr("href");
-                    if(href.startsWith("http://www.jianshu.com")||href.startsWith("https://github.com")){
-                        InterviewBean interviewBean = new InterviewBean();
-                        interviewBean.setPart("第"+(i+1)+"部分");
-                        interviewBean.setTag("第"+(i+1)+"部分");
-                        interviewBean.setName(element.text());
-                        interviewBean.setAdress(href);
-                        interviewBean.setCanLoad(true);
-                        interviewBean.save();
-                        LUtil.e("bean:"+interviewBean.toGson());
-                    }
+                    InterviewBean interviewBean = new InterviewBean();
+                    interviewBean.setPart("第"+(i+1)+"部分");
+                    interviewBean.setTag("第"+(i+1)+"部分");
+                    interviewBean.setName(element.text());
+                    interviewBean.setAdress(href);
+                    interviewBean.setCanLoad(true);
+                    interviewBean.save();
+                    LUtil.e("bean:"+interviewBean.toGson());
 
                     break;
                 }
@@ -70,16 +75,14 @@ public class ParseDataService extends Service {
                         if(bean.getElementsByTag("a").size() != 0){
                             href = bean.getElementsByTag("a").first().attr("href");
                         }
-                        if(href.startsWith("http://www.jianshu.com")||href.startsWith("https://github.com")){
-                            InterviewBean interviewBean = new InterviewBean();
-                            interviewBean.setPart("第"+(i+1)+"部分");
-                            interviewBean.setTag(tagP.text());
-                            interviewBean.setName(bean.text());
-                            interviewBean.setAdress(href);
-                            interviewBean.setCanLoad(href.length() != 0);
-                            interviewBean.save();
-                            LUtil.e("bean:"+interviewBean.toGson());
-                        }
+                        InterviewBean interviewBean = new InterviewBean();
+                        interviewBean.setPart("第"+(i+1)+"部分");
+                        interviewBean.setTag(tagP.text());
+                        interviewBean.setName(bean.text());
+                        interviewBean.setAdress(href);
+                        interviewBean.setCanLoad(href.length() != 0);
+                        interviewBean.save();
+                        LUtil.e("bean:"+interviewBean.toGson());
 
                     }else{
                         String beantag = bean.text();
@@ -94,16 +97,14 @@ public class ParseDataService extends Service {
                                 if(beanData.getElementsByTag("a").size() != 0){
                                     href = beanData.getElementsByTag("a").first().attr("href");
                                 }
-                                if(href.startsWith("http://www.jianshu.com")||href.startsWith("https://github.com")){
-                                    InterviewBean interviewBean = new InterviewBean();
-                                    interviewBean.setPart("第"+(i+1)+"部分");
-                                    interviewBean.setTag(tagP.text());
-                                    interviewBean.setName(beantag+"  "+beanData.text());
-                                    interviewBean.setAdress(href);
-                                    interviewBean.setCanLoad(href.length() != 0);
-                                    interviewBean.save();
-                                    LUtil.e("bean:"+interviewBean.toGson());
-                                }
+                                InterviewBean interviewBean = new InterviewBean();
+                                interviewBean.setPart("第"+(i+1)+"部分");
+                                interviewBean.setTag(tagP.text());
+                                interviewBean.setName(beantag+"  "+beanData.text());
+                                interviewBean.setAdress(href);
+                                interviewBean.setCanLoad(href.length() != 0);
+                                interviewBean.save();
+                                LUtil.e("bean:"+interviewBean.toGson());
 
                             }
                         }else{
@@ -113,6 +114,56 @@ public class ParseDataService extends Service {
                 }
             }
         }
+        List<InterviewBean> data = DataSupport.findAll(InterviewBean.class);
+        List<BmobObject> infos = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            InterviewBean bean = data.get(i);
+            if(bean.isCanLoad()){
+                InterViewInfo info = new InterViewInfo();
+                info.setPart(bean.getPart());
+                info.setType(bean.getTag());
+                info.setName(bean.getName());
+                info.setRead(false);
+                info.setFile_Link(bean.getAdress());
+                info.setFile_Type(1);
+                info.setStar(false);
+                infos.add(info);
+            }
+
+        }
+        LUtil.e(TAG,"有效数据："+infos.size());
+        for (int i = 0; i < (Math.ceil(infos.size()/50f)); i++) {
+            List<BmobObject> values;
+                if(i==(Math.ceil(infos.size()/50f))-1){
+                    values = infos.subList(i*50,infos.size());
+                }else{
+                    values = infos.subList(i*50,i*50+50);
+                }
+            sumbitData(values);
+        }
+
+    }
+
+    private void sumbitData(List<BmobObject> infos) {
+        new BmobBatch().insertBatch(infos).doBatch(new QueryListListener<BatchResult>() {
+
+            @Override
+            public void done(List<BatchResult> o, BmobException e) {
+                if(e==null){
+                    for(int i=0;i<o.size();i++){
+                        BatchResult result = o.get(i);
+                        BmobException ex =result.getError();
+                        if(ex==null){
+                            LUtil.e(TAG,"第"+i+"个数据批量添加成功："+result.getCreatedAt()+","+result.getObjectId()+","+result.getUpdatedAt());
+                        }else{
+                            LUtil.e(TAG,"第"+i+"个数据批量添加失败："+ex.getMessage()+","+ex.getErrorCode());
+                        }
+                    }
+                }else{
+                    LUtil.e(TAG,"失败："+e.getMessage()+","+e.getErrorCode());
+                }
+            }
+        });
     }
 
     @Override

@@ -11,46 +11,43 @@ import com.zhy.adapter.recyclerview.base.ViewHolder;
 import java.util.List;
 
 import cn.com.luckytry.interview.R;
-import cn.com.luckytry.interview.bean.InterviewBean;
-import cn.com.luckytry.interview.diycode.ContentActivity;
+import cn.com.luckytry.interview.bean.InterViewInfo;
+import cn.com.luckytry.interview.ui.diyFile.ContentActivity;
 
 /**
  * Created by asus on 2017/9/4.
  */
-public class MyAdapter extends CommonAdapter<InterviewBean> {
+public class MyAdapter extends CommonAdapter<InterViewInfo> {
 
     private Context mContext;
-    private List<InterviewBean> data;
+
     private Toast toast;
 
-    public MyAdapter( Context context, int layoutId, List<InterviewBean> datas) {
+    public MyAdapter( Context context, int layoutId, List<InterViewInfo> datas) {
         super(context, layoutId, datas);
         this.mContext = context;
-        this.data = datas;
         toast = Toast.makeText(mContext,"",Toast.LENGTH_SHORT);
     }
 
-    public void setData(List<InterviewBean> data) {
-        this.data = data;
-        notifyDataSetChanged();
-    }
+//    public void setData(List<InterviewBean> data) {
+//        this.data = data;
+//        notifyDataSetChanged();
+//    }
 
     @Override
-    protected void convert(ViewHolder holder, final InterviewBean interviewBean, int position) {
+    protected void convert(ViewHolder holder, final InterViewInfo interviewBean, int position) {
         holder.setText(R.id.tvInterview, interviewBean.getName());
         holder.getConvertView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (interviewBean.isCanLoad()) {
+                if(interviewBean.getFile_Type() == 1){
                     Intent intent = new Intent(mContext, ContentActivity.class);
-                    intent.putExtra("url", interviewBean.getAdress());
+                    intent.putExtra("Id", interviewBean.getObjectId());
                     intent.putExtra("name", interviewBean.getName());
-                    intent.putExtra("tag", interviewBean.getTag());
+                    intent.putExtra("tag", interviewBean.getType());
                     mContext.startActivity(intent);
-                } else {
-                    toast.setText(interviewBean.getName() + " 文章内容正在编写中！");
-                    toast.show();
                 }
+
             }
         });
     }

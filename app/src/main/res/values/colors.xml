@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#D0E9FF</color>
-    <color name="colorPrimaryDark">#EBEDF4</color>
-    <color name="colorAccent">#869B74</color>
+
+    <!--<color name="colorPrimary">#FFFFFF</color>-->
+    <!--<color name="colorPrimaryDark">#ffe0e0e0</color>-->
+    <!--<color name="colorAccent">#03A9F4</color>-->
+
+    <!--<color name="colorBaseBackground">#fafafa</color>-->
+
+    <color name="colorNavItemUnselected">#4400EFFF</color>
+    <color name="colorNavItemSelected">@color/colorAccent</color>
+
+    <!--<color name="colorPrimaryText">#212121</color>-->
+    <color name="colorSecondaryText">#757575</color>
+    <!--<color name="colorPrimary">#D0E9FF</color>-->
+    <!--<color name="colorPrimaryDark">#EBEDF4</color>-->
+    <!--<color name="colorAccent">#869B74</color>-->
+    <color name="text_bg">#99ffffff</color>
+    <color name="type_text">#66000000</color>
+    <color name="type_bg">#eeeeee</color>
+    <color name="types_bg">#cdcdcd</color>
+    <color name="part_defult_bg">#ffffff</color>
+    <color name="part_selected_bg">#88ffffff</color>
+    <color name="colorPrimary">#00b8d4</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+
 
     <color name="colorBaseBackground">#fafafa</color>
 
@@ -24,7 +47,7 @@
     <color name="defult_textcolor_night">#999999</color>
 
     <color name="progress_color">#00ff00</color>
-    <color name="fab_color">#C3BED4</color>
+    <color name="fab_color">#C51162</color>
 
     <color name="main">#FF31C27C</color>
     <color name="main_dark">#FF535353</color>
