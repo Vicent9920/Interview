@@ -2,7 +2,7 @@
 
 下文中FragmentDemo的源代码地址：[https://github.com/xiazdong/FragmentDemo](https://github.com/xiazdong/FragmentDemo)
 
-**基本概念**
+基本概念
 ----
 Fragment，简称碎片，是Android 3.0（API 11）提出的，为了兼容低版本，support-v4库中也开发了一套Fragment API，最低兼容Android 1.6。
 
@@ -26,7 +26,7 @@ Fragment官方的定义是：
 
 > Android 3.0系统只针对平板电脑，且闭源，那时候针对手机和针对平板是两套源代码，后来Android 4.0时整合了手机和平板的源码，因此市面上很难看到Android 3.0系统。
 
-**Fragment的优势有以下几点：**
+Fragment的优势有以下几点：
 
  - 模块化（Modularity）：我们不必把所有代码全部写在Activity中，而是把代码写在各自的Fragment中。
  - 可重用（Reusability）：多个Activity可以重用一个Fragment。
@@ -34,7 +34,7 @@ Fragment官方的定义是：
 
 ![这里写图片描述](https://mmbiz.qpic.cn/mmbiz_png/tnZGrhTk4dcYiaLxLJBmChcJic3Vr4tZwYLY69JZ7htUUpbAibLL9RicSMByS5UPMj1GK4teW7ibDvmshtfb1oiciaEew/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1)
 
- **Fragment核心的类有：**
+ Fragment核心的类有：
 
  - Fragment：Fragment的基类，任何创建的Fragment都需要继承该类。
  - FragmentManager：管理和维护Fragment。他是抽象类，具体的实现类是FragmentManagerImpl。
@@ -43,7 +43,7 @@ Fragment官方的定义是：
 Nested Fragment（Fragment内部嵌套Fragment的能力）是Android 4.2提出的，support-fragment库可以兼容到1.6。通过getChildFragmentManager()能够获得管理子Fragment的FragmentManager，在子Fragment中可以通过getParentFragment()获得父Fragment。
 
 
-<h3>**基本使用**<h3/>
+<h3>基本使用<h3/>
 
 这里给出Fragment最基本的使用方式。首先，创建继承Fragment的类，名为Fragment1：
 
@@ -116,7 +116,7 @@ if (bundle == null) {
  - addToBackStack("fname")是可选的。FragmentManager拥有回退栈（BackStack），类似于Activity的任务栈，如果添加了该语句，就把该事务加入回退栈，当用户点击返回按钮，会回退该事务（回退指的是如果事务是add(frag1)，那么回退操作就是remove(frag1)）；如果没添加该语句，用户点击返回按钮会直接销毁Activity。
  - Fragment有一个常见的问题，即Fragment重叠问题，这是由于Fragment被系统杀掉，并重新初始化时再次将fragment加入activity，因此通过在外围加if语句能判断此时是否是被系统杀掉并重新初始化的情况。
 
-**Fragment有个常见的异常：**
+Fragment有个常见的异常：
 
 ```
 java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState
@@ -127,12 +127,12 @@ java.lang.IllegalStateException: Can not perform this action after onSaveInstanc
 ```
 该异常出现的原因是：commit()在onSaveInstanceState()后调用。首先，onSaveInstanceState()在onPause()之后，onStop()之前调用。onRestoreInstanceState()在onStart()之后，onResume()之前。
 
-**因此避免出现该异常的方案有：**
+因此避免出现该异常的方案有：
 
  - 不要把Fragment事务放在异步线程的回调中，比如不要把Fragment事务放在AsyncTask的onPostExecute()，因此onPostExecute()可能会在onSaveInstanceState()之后执行。
  - 逼不得已时使用commitAllowingStateLoss()。
 
-<h3>**生命周期**<h3>
+<h3>生命周期<h3>
 
 Fragment的生命周期和Activity类似，但比Activity的生命周期复杂一些，基本的生命周期方法如下图：
 
@@ -266,7 +266,7 @@ FragmentTransaction有一些基本方法，下面给出调用这些方法时，F
  - detach(): onPause()->onStop()->onDestroyView()。UI从布局中移除，但是仍然被FragmentManager管理。
  - attach(): onCreateView()->onStart()->onResume()。
 
-<h3>**Fragment实现原理和Back Stack**<h3/>
+<h3>Fragment实现原理和Back Stack<h3/>
 
 我们知道Activity有任务栈，用户通过startActivity将Activity加入栈，点击返回按钮将Activity出栈。Fragment也有类似的栈，称为回退栈（Back Stack），回退栈是由FragmentManager管理的。默认情况下，Fragment事务是不会加入回退栈的，如果想将Fragment事务加入回退栈，则可以加入addToBackStack("")。如果没有加入回退栈，则用户点击返回按钮会直接将Activity出栈；如果加入了回退栈，则用户点击返回按钮会回滚Fragment事务。
 
@@ -455,9 +455,9 @@ class FragmentManagerImpl extends FragmentManager {
 ```
 从上面看到，先从mAdded中查找是否有该Fragment，如果没找到，再从mActive中查找是否有该Fragment。mAdded是已经添加到Activity的Fragment的集合，mActive不仅包含mAdded，还包含虽然不在Activity中，但还在回退栈中的Fragment。
 
-<h3>**Fragment通信**<h3/>
+<h3>Fragment通信<h3/>
 
-<h3>**Fragment向Activity传递数据**<h3/>
+<h3>Fragment向Activity传递数据<h3/>
 
 首先，在Fragment中定义接口，并让Activity实现该接口（具体实现省略）：
 
@@ -479,7 +479,7 @@ public void onAttach(Context context) {
 ```
 并在Fragment合适的地方调用mListener.onItemClick("hello")将”hello”从Fragment传递给Activity。
 
-<h3>**FABridge**<h3/>
+<h3>FABridge<h3/>
 
 由于通过接口的方式从Fragment向Activity进行数据传递比较麻烦，需要在Fragment中定义interface，并让Activity实现该interface，FABridge(https://github.com/hongyangAndroid/FABridge)通过注解的形式免去了这些定义。
 
@@ -500,7 +500,7 @@ annotationProcessor 'com.zhy.fabridge:fabridge-compiler:1.0.0'compile 'com.zhy.f
 ```
 Fabridge.call(mActivity,FAB_ITEM_CLICK,"data");  //调用ID对应的方法，"data"为参数值
 ```
-<h3>**Activity向Fragment传递数据**<h3/>
+<h3>Activity向Fragment传递数据<h3/>
 
 Activity向Fragment传递数据比较简单，获取Fragment对象，并调用Fragment的方法即可，比如要将一个字符串传递给Fragment，则在Fragment中定义方法：
 
@@ -511,11 +511,11 @@ public void setString(String str) {
 ```
 并在Activity中调用fragment.setString("hello")即可。
 
-<h3>**Fragment之间通信**<h3/>
+<h3>Fragment之间通信<h3/>
 
 由于Fragment之间是没有任何依赖关系的，因此如果要进行Fragment之间的通信，建议通过Activity作为中介，不要Fragment之间直接通信。
 
-<h3>**DialogFragment**<h3/>
+<h3>DialogFragment<h3/>
 
 DialogFragment是Android 3.0提出的，代替了Dialog，用于实现对话框。他的优点是：即使旋转屏幕，也能保留对话框状态。
 
@@ -560,9 +560,9 @@ fragment.show(getSupportFragmentManager(), "tag");//fragment.dismiss();
         android:radius="20dp"/>
 </shape>
 ```
-<h3>**ViewPager+Fragment相关**<h3/>
+<h3>ViewPager+Fragment相关<h3/>
 
-<h4>**基本使用**<h4/>
+<h4>基本使用<h4/>
 
 ViewPager是support v4库中提供界面滑动的类，继承自ViewGroup。PagerAdapter是ViewPager的适配器类，为ViewPager提供界面。但是一般来说，通常都会使用PagerAdapter的两个子类：FragmentPagerAdapter和FragmentStatePagerAdapter作为ViewPager的适配器，他们的特点是界面是Fragment。
 
@@ -581,7 +581,7 @@ FragmentPagerAdapter和FragmentStatePagerAdapter需要重写的方法都一样�
  - void destroyItem(ViewGroup container, int position, Object object): container是ViewPager对象，object是Fragment对象。
  - getItemPosition(Object object): object是Fragment对象，如果返回POSITION_UNCHANGED，则表示当前Fragment不刷新，如果返回POSITION_NONE，则表示当前Fragment需要调用destroyItem()和instantiateItem()进行销毁和重建。 默认情况下返回POSITION_UNCHANGED。
 
-<h3>**懒加载**<h3/>
+<h3>懒加载<h3/>
 
 
 懒加载主要用于ViewPager且每页是Fragment的情况，场景为微信主界面，底部有4个tab，当滑到另一个tab时，先显示”正在加载”，过一会才会显示正常界面。
@@ -681,7 +681,7 @@ public class LazyFragment extends Fragment {    private View mRootView;
 </FrameLayout>
 ```
 
-  <h2> **参考文献**<h2/> 
+  <h2> 参考文献<h2/> 
 
  - [入门)](https://www.raywenderlich.com/169885/android-fragments-tutorial-introduction-2)
  - [教程1](http://assets.en.oreilly.com/1/event/68/Fragments%20for%20All%20Presentation.pdf)
