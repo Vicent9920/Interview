@@ -269,7 +269,8 @@ FragmentTransaction有一些基本方法，下面给出调用这些方法时，F
  - detach(): onPause()->onStop()->onDestroyView()。UI从布局中移除，但是仍然被FragmentManager管理。
  - attach(): onCreateView()->onStart()->onResume()。
 
-<h3>Fragment实现原理和Back Stack<h3/>
+Fragment实现原理和Back Stack
+----
 
 我们知道Activity有任务栈，用户通过startActivity将Activity加入栈，点击返回按钮将Activity出栈。Fragment也有类似的栈，称为回退栈（Back Stack），回退栈是由FragmentManager管理的。默认情况下，Fragment事务是不会加入回退栈的，如果想将Fragment事务加入回退栈，则可以加入addToBackStack("")。如果没有加入回退栈，则用户点击返回按钮会直接将Activity出栈；如果加入了回退栈，则用户点击返回按钮会回滚Fragment事务。
 
