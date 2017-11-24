@@ -681,7 +681,7 @@ public class LazyFragment extends Fragment {    private View mRootView;
 </FrameLayout>
 ```
 
-  <h2> **参考文献**<h2/>
+  <h2> **参考文献**<h2/> 
 
  - [入门)](https://www.raywenderlich.com/169885/android-fragments-tutorial-introduction-2)
  - [教程1](http://assets.en.oreilly.com/1/event/68/Fragments%20for%20All%20Presentation.pdf)

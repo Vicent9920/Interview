@@ -2,7 +2,7 @@
 
 Window是一个抽象类，它的具体实现是PhoneWindow。WindowManager是外界访问Window的入口，Window的具体实现位于WindowManagerService中，WindowManager和WindowManagerService的交互是一个IPC过程。Android中所有的视图都是通过Window来呈现的，不管是Activity、Dialog还是Toast，它们的视图实际上都是附加在Window上的，因此Window实际是View的直接管理者。
 
-###8.1 Window和WindowManager
+###8.1 Window和WindowManager  
 
 为了分析Window的工作机制，先通过代码了解如何使用WindowManager添加一个Window，下面一段代码将一个Button添加到屏幕坐标为(100, 300)的位置上
 
@@ -22,7 +22,7 @@ mLayoutParams.y = 300;
 mFloatingButton.setOnTouchListener(this);
 mWindowManager.addView(mFloatingButton, mLayoutParams);
 ```
-Flags参数表示Window的属性，以下列举常用的选项：
+Flags参数表示Window的属性，以下列举常用的选项：  
 
 * FLAG_NOT_FOCUSABLE：表示Window不需要获取焦点，也不需要接收各种输入事件，此标记会同时启动FLAG_NOT_TOUCH_MODEL，最终事件会传递给下层的具有焦点的Window
 * FLAG_NOT_TOUCH_MODAL：在此模式下，系统会将当前Window区域以外的单击事件传递给底层的Window，当前Window区域以内的单击事件则自己处理。这个标记很重要，一般来说都需要开启此标记，否则其他Window将无法收到单击事件。
@@ -39,7 +39,7 @@ Window是分层的，每个Window都有对应的z-ordered，层级最大的会�
 
 mLayoutParams.type = LayoutParams.TYPE_SYSTEM_ERROR
 
-同时声明权限：
+同时声明权限：  
 
 <uses-permissionandroid:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
@@ -49,7 +49,7 @@ WindowManager所提供的功能很简单，常用的只有三个方法，即添�
 
 Window是一个抽象的概念，并不是实际存在的，它是以View的形式存在，每一个Window都对应着一个View和一个ViewRootImpl，Window和View通过ViewRootImpl来建立联系。在实际使用中无法直接访问Window，对Window的访问必须通过WindowManager。
 
-####8.2.1 Window的添加过程
+####8.2.1 Window的添加过程    
 
 Window的添加过程需要通过WindowManager的addView来实现，WindowManager是一个接口，它的真正实现是WindowManagerImpl类。WindowManager的实现类对于addView、updateView和removeView方法都是委托给WindowManagerGlobal类。
 
