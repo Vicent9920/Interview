@@ -79,7 +79,8 @@ WindowManagerGlobal的addView方法分为如下几步：
 
 Window的创建过程
 
-###8.3.1 Activity的Window创建过程
+8.3.1 Activity的Window创建过程
+---
 
 1、Activity的启动过程很复杂，最终会由ActivityThread中的performLaunchActivity()来完成整个启动过程，在这个方法内部会通过类加载器创建Activity的实例对象，并调用其attach方法为其关联运行过程中所依赖的一系列上下文环境变量。
 
@@ -92,15 +93,17 @@ PhoneWindow方法大致遵循如下几个步骤：
 2. 将View添加到DecorView的mContentParent中
 3. 回调Activity的onCreateChanged方法通知Activity视图已经发生改变
 
-###8.3.2 Dialog的Window创建过程
+8.3.2 Dialog的Window创建过程
+---
 
 Dialog的Window的创建过程和Activity类似，有如下步骤：
 
 1. 创建Window:Diolog中Window的创建同样是通过PolicyManager的makeNewWindow方法来完成的，创建后的对象实际上就是PhoneWindow。
 2. 初始化DecorView并将Dialog的视图添加到DecorView中
-3. 将DecorView添加到Window中并显示：普通的Dialog有一个特殊之处，就是必须采用Activity的Context，如果采用Application的Context，那么就会报错。应用token只有Activity拥有，所以这里只需要Activity作为Context来显示对话框即可。
+3.将DecorView添加到Window中并显示：普通的Dialog有一个特殊之处，就是必须采用Activity的Context，如果采用Application的Context，那么就会报错。应用token只有Activity拥有，所以这里只需要Activity作为Context来显示对话框即可。
 
-###8.3.3 Toast的Window创建过程
+8.3.3 Toast的Window创建过程
+---
 
 在Toast的内部有两类IPC过程，第一类是Toast访问NotificationManagerService，第二类是NotificationManagerService回调Toast里的TN接口。
 
