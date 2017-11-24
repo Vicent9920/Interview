@@ -42,8 +42,9 @@ Fragment的优势有以下几点：
 
 Nested Fragment（Fragment内部嵌套Fragment的能力）是Android 4.2提出的，support-fragment库可以兼容到1.6。通过getChildFragmentManager()能够获得管理子Fragment的FragmentManager，在子Fragment中可以通过getParentFragment()获得父Fragment。
 
+基本使用
+----
 
-<h3>基本使用<h3/>
 
 这里给出Fragment最基本的使用方式。首先，创建继承Fragment的类，名为Fragment1：
 
@@ -132,7 +133,9 @@ java.lang.IllegalStateException: Can not perform this action after onSaveInstanc
  - 不要把Fragment事务放在异步线程的回调中，比如不要把Fragment事务放在AsyncTask的onPostExecute()，因此onPostExecute()可能会在onSaveInstanceState()之后执行。
  - 逼不得已时使用commitAllowingStateLoss()。
 
-<h3>生命周期<h3>
+生命周期
+----
+
 
 Fragment的生命周期和Activity类似，但比Activity的生命周期复杂一些，基本的生命周期方法如下图：
 
@@ -455,7 +458,8 @@ class FragmentManagerImpl extends FragmentManager {
 ```
 从上面看到，先从mAdded中查找是否有该Fragment，如果没找到，再从mActive中查找是否有该Fragment。mAdded是已经添加到Activity的Fragment的集合，mActive不仅包含mAdded，还包含虽然不在Activity中，但还在回退栈中的Fragment。
 
-<h3>Fragment通信<h3/>
+Fragment通信
+----
 
 <h3>Fragment向Activity传递数据<h3/>
 
@@ -479,7 +483,8 @@ public void onAttach(Context context) {
 ```
 并在Fragment合适的地方调用mListener.onItemClick("hello")将”hello”从Fragment传递给Activity。
 
-<h3>FABridge<h3/>
+FABridge
+----
 
 由于通过接口的方式从Fragment向Activity进行数据传递比较麻烦，需要在Fragment中定义interface，并让Activity实现该interface，FABridge(https://github.com/hongyangAndroid/FABridge)通过注解的形式免去了这些定义。
 
@@ -511,7 +516,8 @@ public void setString(String str) {
 ```
 并在Activity中调用fragment.setString("hello")即可。
 
-<h3>Fragment之间通信<h3/>
+Fragment之间通信
+----
 
 由于Fragment之间是没有任何依赖关系的，因此如果要进行Fragment之间的通信，建议通过Activity作为中介，不要Fragment之间直接通信。
 
@@ -560,9 +566,12 @@ fragment.show(getSupportFragmentManager(), "tag");//fragment.dismiss();
         android:radius="20dp"/>
 </shape>
 ```
-<h3>ViewPager+Fragment相关<h3/>
+ViewPager+Fragment相关Fragment之间通信
+----
 
-<h4>基本使用<h4/>
+基本使用
+----
+
 
 ViewPager是support v4库中提供界面滑动的类，继承自ViewGroup。PagerAdapter是ViewPager的适配器类，为ViewPager提供界面。但是一般来说，通常都会使用PagerAdapter的两个子类：FragmentPagerAdapter和FragmentStatePagerAdapter作为ViewPager的适配器，他们的特点是界面是Fragment。
 
@@ -581,8 +590,8 @@ FragmentPagerAdapter和FragmentStatePagerAdapter需要重写的方法都一样�
  - void destroyItem(ViewGroup container, int position, Object object): container是ViewPager对象，object是Fragment对象。
  - getItemPosition(Object object): object是Fragment对象，如果返回POSITION_UNCHANGED，则表示当前Fragment不刷新，如果返回POSITION_NONE，则表示当前Fragment需要调用destroyItem()和instantiateItem()进行销毁和重建。 默认情况下返回POSITION_UNCHANGED。
 
-<h3>懒加载<h3/>
-
+懒加载
+----
 
 懒加载主要用于ViewPager且每页是Fragment的情况，场景为微信主界面，底部有4个tab，当滑到另一个tab时，先显示”正在加载”，过一会才会显示正常界面。
 
