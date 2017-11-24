@@ -462,7 +462,8 @@ class FragmentManagerImpl extends FragmentManager {
 Fragment通信
 ----
 
-<h3>Fragment向Activity传递数据<h3/>
+Fragment向Activity传递数据
+--
 
 首先，在Fragment中定义接口，并让Activity实现该接口（具体实现省略）：
 
@@ -506,7 +507,8 @@ annotationProcessor 'com.zhy.fabridge:fabridge-compiler:1.0.0'compile 'com.zhy.f
 ```
 Fabridge.call(mActivity,FAB_ITEM_CLICK,"data");  //调用ID对应的方法，"data"为参数值
 ```
-<h3>Activity向Fragment传递数据<h3/>
+Activity向Fragment传递数据
+----
 
 Activity向Fragment传递数据比较简单，获取Fragment对象，并调用Fragment的方法即可，比如要将一个字符串传递给Fragment，则在Fragment中定义方法：
 
@@ -522,7 +524,8 @@ Fragment之间通信
 
 由于Fragment之间是没有任何依赖关系的，因此如果要进行Fragment之间的通信，建议通过Activity作为中介，不要Fragment之间直接通信。
 
-<h3>DialogFragment<h3/>
+DialogFragment
+----
 
 DialogFragment是Android 3.0提出的，代替了Dialog，用于实现对话框。他的优点是：即使旋转屏幕，也能保留对话框状态。
 
