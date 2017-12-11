@@ -14,7 +14,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -46,7 +45,6 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
     private boolean isRefresh = false;
     private Handler mHandler;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
     public String tag;
     public String name;
     private TextView textView;
@@ -298,23 +296,11 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
         AppBarLayout mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
         mAppBarLayout.addOnOffsetChangedListener(mPresenter.getAppBarStateChangeListener() );
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if(!isRefresh){
-                    isRefresh = true;
-                   ContentActivity.this.runOnUiThread(new Runnable() {
-                       @Override
-                       public void run() {
-                           reresh();
-                       }
-                   });
-                }
-            }
-        });
+//        SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refreshLayout);
+//        swipeRefreshLayout.setColorSchemeColors(Color.parseColor("#ffffffff"),Color.parseColor("#ffffffff"));
         mToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         mWebView = (ShowTextWebView) findViewById(R.id.web_view);
+        mWebView.setScrollbarFadingEnabled(true);
         mLoadingView = (Kawaii_LoadingView) findViewById(R.id.Kawaii_LoadingView);
 
         String url = getIntent().getStringExtra("Id");
@@ -359,16 +345,14 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void showSource(String source) {
 
-        mWebView.loadDataWithBaseURL(null, source, "text/html", "utf-8",null);
+//        mWebView.loadDataWithBaseURL(null, source, "text/html", "utf-8",null);
+//        mWebView.loadUrl(source);
+        mWebView.loadingUrl(source);
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
 
         mWebView.setVisibility(View.VISIBLE);
 
-        if(isRefresh){
-            mSwipeRefreshLayout.setRefreshing(false);
-        }else{
-            mLoadingView.setVisibility(View.GONE);
-        }
+        mLoadingView.setVisibility(View.GONE);
         isRefresh = false;
 
     }

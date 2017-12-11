@@ -7,6 +7,9 @@
     android:fitsSystemWindows="true"
     android:id="@+id/coordinatorLayout">
 
+
+
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -36,6 +39,7 @@
                 android:gravity="center"
                 android:scrollbarAlwaysDrawVerticalTrack="true" />
 
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -47,72 +51,54 @@
         </android.support.design.widget.CollapsingToolbarLayout>
 
     </android.support.design.widget.AppBarLayout>
-
-    <android.support.v4.widget.SwipeRefreshLayout
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:id="@+id/refreshLayout">
+        android:id="@+id/nested_scroll_view"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.v4.widget.NestedScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="true">
-            <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:orientation="vertical"-->
-            <!--android:descendantFocusability="blocksDescendants"-->
-            <!--android:focusableInTouchMode="true">-->
+            android:layout_height="match_parent"
+            android:background="@color/colorBaseBackground"
+            android:orientation="vertical">
 
-            <!---->
-            <!--</LinearLayout>-->
-            <LinearLayout
+
+            <cn.com.luckytry.interview.ui.widget.Kawaii_LoadingView
+
+                android:id="@+id/Kawaii_LoadingView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/colorBaseBackground"
-                android:orientation="vertical">
+                android:layout_height="400dp"
 
 
-                <cn.com.luckytry.interview.ui.widget.Kawaii_LoadingView
+                android:background="#00ffffff"
+                app:blockColor="@color/progress_color"
 
-                    android:id="@+id/Kawaii_LoadingView"
-                    android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:background="#00ffffff"
+                app:lineNumber="3"
+                app:fixBlock_Angle="5"
+                app:moveBlock_Angle="20"
 
+                app:blockInterval="8dp"
+                app:half_BlockWidth="15dp"
+                app:initPosition="0"
 
-                    android:visibility="visible"
-                    app:blockColor="@color/progress_color"
+                app:isClock_Wise="false"
+                app:moveSpeed="500"
+                app:move_Interpolator="@android:anim/bounce_interpolator"
 
-                    app:blockInterval="8dp"
-                    app:fixBlock_Angle="5"
-                    app:half_BlockWidth="15dp"
+                />
 
-                    app:initPosition="0"
-                    app:isClock_Wise="false"
-                    app:lineNumber="3"
-
-                    app:moveBlock_Angle="20"
-                    app:moveSpeed="500"
-                    app:move_Interpolator="@android:anim/bounce_interpolator"
-
-                    />
-
-                <cn.com.luckytry.interview.ui.widget.ShowTextWebView
-                    android:id="@+id/web_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-        </android.support.v4.widget.NestedScrollView>
+            <cn.com.luckytry.interview.ui.widget.ShowTextWebView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="gone"
+                android:id="@+id/web_view" />
+        </LinearLayout>
 
 
+    </android.support.v4.widget.NestedScrollView>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_shar"
         android:layout_width="wrap_content"

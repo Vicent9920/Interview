@@ -13,10 +13,7 @@ import android.webkit.WebResourceError;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +27,8 @@ import cn.com.luckytry.interview.bean.InterViewInfo;
 import cn.com.luckytry.interview.bean.InterViewUser;
 import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.ui.BaseView;
+import cn.com.luckytry.interview.ui.parsehtml.WebFactory;
 import cn.com.luckytry.interview.ui.widget.ShowTextWebView;
-import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.LUtil;
 
 import static cn.bmob.v3.BmobUser.getCurrentUser;
@@ -250,6 +247,7 @@ public class ContentPresenter implements ContentContract.Presenter {
      * 加载资源
      */
     public void parpreSource() {
+
         new Thread(new ApiRunnable(mBean.getFile_Link())).start();
     }
 
@@ -279,35 +277,36 @@ public class ContentPresenter implements ContentContract.Presenter {
         private String url;
         public
         ApiRunnable(String url){
+            mView.showSource(url);
             this.url = url;
         }
         @Override
         public void run() {
-            try {
-                Document doc = Jsoup.connect(url).get();
-                final String html ;
+//                Document doc = Jsoup.connect(url).get();
+//                final String html ;
+//
+//                if(url.startsWith("http://www.jianshu.com")){
+////                    html = doc.getElementsByClass("content").html();
+//                    html = doc.select("div.show-content").first().html();
+//                    mText = doc.select("div.show-content").first().text();
+//                }else if(url.startsWith("https://github.com/")){
+//                    html = doc.getElementsByTag("article").html();
+//                    mText = doc.getElementsByTag("article").text();
+//                }else if(url.startsWith("http://p.codekk.com/blogs")){
+//                    html = doc.select("div.hero-unit").first().html();
+//                    mText = doc.select("div.hero-unit").first().text();
+//                }else{
+//                    html = "";
+//                }
 
-                if(url.startsWith("http://www.jianshu.com")){
-//                    html = doc.getElementsByClass("content").html();
-                    html = doc.select("div.show-content").first().html();
-                    mText = doc.select("div.show-content").first().text();
-                }else if(url.startsWith("https://github.com/")){
-                    html = doc.getElementsByTag("article").html();
-                    mText = doc.getElementsByTag("article").text();
-                }else if(url.startsWith("http://p.codekk.com/blogs")){
-                    html = doc.select("div.hero-unit").first().html();
-                    mText = doc.select("div.hero-unit").first().text();
-                }else{
-                    html = "";
-                }
-
-               mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        String source = Const.getData(mView.getContext(),html);
-                        mView.showSource(source);
-                    }
-                });
+                mText = WebFactory.getWebData(url).getText();
+//               mHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        String source = Const.getData(mView.getContext(),html);
+//                        mView.showSource(source);
+//                    }
+//                });
                 mBean.setFile_Content(mText);
                 mBean.update(new UpdateListener() {
                     @Override
@@ -328,10 +327,7 @@ public class ContentPresenter implements ContentContract.Presenter {
                         }
                     }
                 });
-            } catch (IOException e) {
-                LUtil.e("ApiRnnable",e);
-                e.printStackTrace();
-            }
+
         }
     }
 
