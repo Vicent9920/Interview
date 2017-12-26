@@ -12,7 +12,7 @@ public class Const {
 
     public static final String SPTAG = "interview";
     public static final String THEME_MOUDLE = "theme_moudle";
-
+    public static final String DATABASE_KEY = "database_key";
 
 
 

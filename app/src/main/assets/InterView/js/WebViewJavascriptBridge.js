@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-	<meta charset="utf-8" />
-	<title>MarkDown文件加载</title>
-	<style>
+	<head>
+		<meta charset="utf-8" />
+		<title>MarkDown文件加载</title>
+		<style>
 			body {
 				background-color: blueviolet;
 			}
-
+			
 			* {
 				max-width: 100vw;
 				text-overflow: ellipsis;
 				overflow: hidden;
 			}
-
+			
 			;
 		</style>
-</head>
-<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="js/marked.js"></script>
-<script type="text/javascript" src="js/http.js"></script>
+	</head>
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/marked.js"></script>
+	<script src="js/http.js"></script>
+	<script src="js/WebViewJavascriptBridge.js"></script>
 
-<body>
+	<body>
 
-</body>
-<script>
-
+	</body>
+	<script>
 		function loadData(url) {
-			alert(url);
 			var data1 = {
 				"url": url
 			};
@@ -64,7 +63,7 @@
 
 		function parseInfo(parameters) {
 
-//			var repoPath = new URL(parameters.url).pathname;
+			//			var repoPath = new URL(parameters.url).pathname;
 			var repoPath = GetUrlRelativePath(parameters.url);
 			console.log("repoPath：" + repoPath);
 
@@ -115,19 +114,47 @@
 			} else {
 				//普通get请求
 				http.get(repoInfo.urlPrefix + repoInfo.resPath + repoInfo.urlPostfix, function(err, result) {
-					if(err) {
-						console.log(JSON.stringify(err));
-					} else {
-						$.get(result.download_url, function(response, status, xhr) {
-							$("body").html(marked(response));
-
-
-						});
+						if(err) {
+							console.log(JSON.stringify(err));
+						} else {
+							$.get(result.download_url, function(response, status, xhr) {
+									$("body").html(marked(response));
+									var data = $('body').text();
+									resultData(data);
+								);
+							});
 					}
 				});
 
+		}
+		}
+	</script>
+	<script>
+		function connectWebViewJavascriptBridge(callback) {
+			if(window.WebViewJavascriptBridge) {
+				callback(WebViewJavascriptBridge)
+			} else {
+				document.addEventListener(
+					'WebViewJavascriptBridgeReady',
+					function() {
+						callback(WebViewJavascriptBridge)
+					},
+					false
+				);
 			}
 		}
+		connectWebViewJavascriptBridge(function(bridge) {
+			bridge.init(function(message, responseCallback) {
+
+			});
+
+		});
+
+		function resultData(data) {
+			window.WebViewJavascriptBridge.callHandler('resultText', data, function(responseData) {
+
+				}
+			}
 	</script>
 
 </html>

@@ -15,7 +15,15 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_test" />
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+    <!--<include layout="@layout/content_test" />-->
 
 
 

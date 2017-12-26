@@ -8,8 +8,6 @@ import android.os.IBinder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,9 +21,11 @@ import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.datatype.BatchResult;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.QueryListListener;
-import cn.com.luckytry.interview.bean.InterViewInfo;
-import cn.com.luckytry.interview.bean.InterviewBean;
+import cn.com.luckytry.interview.bean.InterViewMoudle;
+import cn.com.luckytry.interview.util.Const;
+import cn.com.luckytry.interview.util.DataBaseHelper;
 import cn.com.luckytry.interview.util.LUtil;
+import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
 public class ParseDataService extends Service {
     private static final String TAG = "ParseDataService";
@@ -36,112 +36,38 @@ public class ParseDataService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        List<InterviewBean> data = DataSupport.findAll(InterviewBean.class);
-        if(data.size() == 0){
-            String value = getDataFromAssetsFile("InterView/main.html");
-            parseValue(value);
-        }
+        parseValue();
     }
 
     /**
      * 解析数据源
-     * @param value
      */
-    private void parseValue(String value) {
-        Document doc = Jsoup.parse(value);
-        Elements parts = doc.getElementsByClass("part");
-        for (int i = 0; i < parts.size(); i++) {
-            Element part = parts.get(i);
-            ArrayList<Element> tag = part.select(".packge");
-            for (Element element:tag) {
-                Element tagP = element.getElementsByTag("p").first();
-                if(tagP==null){
-                    String href = element.getElementsByTag("a").first().attr("href");
-                    InterviewBean interviewBean = new InterviewBean();
-                    interviewBean.setPart("第"+(i+1)+"部分");
-                    interviewBean.setTag("第"+(i+1)+"部分");
-                    interviewBean.setName(element.text());
-                    interviewBean.setAdress(href);
-                    interviewBean.setCanLoad(true);
-                    interviewBean.save();
-                    LUtil.e("bean:"+interviewBean.toGson());
-
-                    break;
-                }
-                Elements beans = element.getElementsByTag("ul").first().getElementsByTag("li");
-                for (Element bean:beans) {
-                    if(bean.getElementsByTag("ul").first()==null){
-                        String href = "";
-                        if(bean.getElementsByTag("a").size() != 0){
-                            href = bean.getElementsByTag("a").first().attr("href");
-                        }
-                        InterviewBean interviewBean = new InterviewBean();
-                        interviewBean.setPart("第"+(i+1)+"部分");
-                        interviewBean.setTag(tagP.text());
-                        interviewBean.setName(bean.text());
-                        interviewBean.setAdress(href);
-                        interviewBean.setCanLoad(href.length() != 0);
-                        interviewBean.save();
-                        LUtil.e("bean:"+interviewBean.toGson());
-
-                    }else{
-                        String beantag = bean.text();
-                        if(beantag.contains(" ")){
-                            String[] title = beantag.split(" ");
-                            beantag = title[0];
-                        }
-                        ArrayList<Element> beanlist = bean.getElementsByTag("ul").first().getElementsByTag("li");
-                        if(beanlist.size()!=0){
-                            for (Element beanData:beanlist) {
-                                String href = "";
-                                if(beanData.getElementsByTag("a").size() != 0){
-                                    href = beanData.getElementsByTag("a").first().attr("href");
-                                }
-                                InterviewBean interviewBean = new InterviewBean();
-                                interviewBean.setPart("第"+(i+1)+"部分");
-                                interviewBean.setTag(tagP.text());
-                                interviewBean.setName(beantag+"  "+beanData.text());
-                                interviewBean.setAdress(href);
-                                interviewBean.setCanLoad(href.length() != 0);
-                                interviewBean.save();
-                                LUtil.e("bean:"+interviewBean.toGson());
-
-                            }
-                        }else{
-                            LUtil.e("err");
-                        }
-                    }
+    private void parseValue() {
+        try {
+            Document doc = Jsoup.connect("http://blog.csdn.net/Vicent_9920/article/details/78797827").get();
+            //markdown_views
+            Element elementOl = doc.select(".markdown_views").first().select("ol").first();//查找第一个a元素
+            ArrayList<Element> elementLis = elementOl.children();
+            List<InterViewMoudle> moudles = new ArrayList<>();
+            for (int i = 0; i < elementLis.size(); i++) {
+                Element item = elementLis.get(i);
+                String[] name = item.html().split("<br>");
+                ArrayList<Element> itemElementList = item.select("ul").first().children();
+                for (int j = 0; j < itemElementList.size(); j++) {
+                    Element moudle = itemElementList.get(j);
+                    InterViewMoudle interViewMoudle = new InterViewMoudle();
+                    interViewMoudle.setFileName(moudle.text());
+                    String adress = moudle.child(0).attr("href");
+                    interViewMoudle.setAdress(adress);
+                    interViewMoudle.setGroup(name[0]);
+                    moudles.add(interViewMoudle);
                 }
             }
+            int size = SharedPrefsUtil.getValue(this, Const.DATABASE_KEY,0,false);
+            DataBaseHelper.updateDataBase(size,moudles);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        List<InterviewBean> data = DataSupport.findAll(InterviewBean.class);
-        List<BmobObject> infos = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++) {
-            InterviewBean bean = data.get(i);
-            if(bean.isCanLoad()){
-                InterViewInfo info = new InterViewInfo();
-                info.setPart(bean.getPart());
-                info.setType(bean.getTag());
-                info.setName(bean.getName());
-                info.setRead(false);
-                info.setFile_Link(bean.getAdress());
-                info.setFile_Type(1);
-                info.setStar(false);
-                infos.add(info);
-            }
-
-        }
-        LUtil.e(TAG,"有效数据："+infos.size());
-        for (int i = 0; i < (Math.ceil(infos.size()/50f)); i++) {
-            List<BmobObject> values;
-                if(i==(Math.ceil(infos.size()/50f))-1){
-                    values = infos.subList(i*50,infos.size());
-                }else{
-                    values = infos.subList(i*50,i*50+50);
-                }
-            sumbitData(values);
-        }
-
     }
 
     private void sumbitData(List<BmobObject> infos) {

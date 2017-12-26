@@ -2,7 +2,60 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_main_item0"
+            android:icon="@drawable/ic_android"
+            android:title="Android" />
+
+        <item
+            android:id="@+id/nav_main_item1"
+            android:icon="@drawable/ic_design"
+            android:title="设计模式" />
+
+        <item
+            android:id="@+id/nav_main_item2"
+            android:icon="@drawable/ic_java"
+            android:title="Java 基础" />
+
+        <item
+            android:id="@+id/nav_main_item3"
+            android:icon="@drawable/ic_concurrent"
+            android:title="Java 并发" />
+
+        <item
+            android:id="@+id/nav_main_item4"
+            android:icon="@drawable/ic_structure"
+            android:title="数据结构" />
+
+        <item
+            android:id="@+id/nav_main_item5"
+            android:icon="@drawable/ic_calculation"
+            android:title="算法" />
+
+        <item
+            android:id="@+id/nav_main_item6"
+            android:icon="@drawable/ic_web"
+            android:title="网络" />
+
+        <item
+            android:id="@+id/nav_main_item7"
+            android:icon="@drawable/ic_note"
+            android:title="读书笔记" />
+
+        <item
+            android:id="@+id/nav_main_item8"
+            android:icon="@drawable/ic_experience"
+            android:title="面试经验" />
+
+    </group>
+
+    <group
+        android:id="@+id/group2"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/nav_main"
             android:icon="@drawable/ic_main"
