@@ -1,9 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="cn.com.luckytry.interview.ui.main.fragment.FileGruopFragment">
+    tools:context="cn.com.luckytry.interview.ui.main.fragment.AboutFragment">
 
     <RelativeLayout
         android:id="@+id/ll_rl_loading"
@@ -29,12 +28,11 @@
             android:text="正在拼命加载数据" />
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_gruops"
+    <WebView
+        android:id="@+id/about_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+    </WebView>
 
-</LinearLayout>
+</FrameLayout>

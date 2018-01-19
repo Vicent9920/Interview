@@ -1,6 +1,5 @@
 package cn.com.luckytry.interview.jsbridge;
 
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -43,23 +42,15 @@ public class BridgeWebViewClient extends WebViewClient {
         }
     }
 
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        super.onPageStarted(view, url, favicon);
-    }
+
 
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        super.onPageFinished(view, url);
-        if(webView.baseUrl.length()>0){
-            view.loadUrl("javascript:loadData('"+webView.baseUrl+"');");
-            webView.baseUrl = "";
-            return;
-        }
-        if (BridgeWebView.toLoadJs != null) {
-            BridgeUtil.webViewLoadLocalJs(view, BridgeWebView.toLoadJs);
-        }
+
+//        if (BridgeWebView.toLoadJs != null) {
+//            BridgeUtil.webViewLoadLocalJs(view, BridgeWebView.toLoadJs);
+//        }
 
         //
         if (webView.getStartupMessage() != null) {
@@ -67,6 +58,11 @@ public class BridgeWebViewClient extends WebViewClient {
                 webView.dispatchMessage(m);
             }
             webView.setStartupMessage(null);
+        }
+        if(webView.baseUrl.length()>0){
+            view.loadUrl("javascript:loadData('"+webView.baseUrl+"');");
+            webView.baseUrl = "";
+            return;
         }
     }
 

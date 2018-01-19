@@ -1,7 +1,5 @@
 package cn.com.luckytry.interview.ui.star;
 
-import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -9,7 +7,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -26,18 +23,12 @@ import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
-import cn.com.luckytry.interview.MyApplication;
 import cn.com.luckytry.interview.R;
 import cn.com.luckytry.interview.adapter.MyAdapter;
 import cn.com.luckytry.interview.bean.InterViewInfo;
 import cn.com.luckytry.interview.bean.InterViewUser;
-import cn.com.luckytry.interview.ui.about.AboutActivity;
-import cn.com.luckytry.interview.ui.main.MainActivity;
 import cn.com.luckytry.interview.ui.widget.DividerItemDecoration;
-import cn.com.luckytry.interview.ui.widget.SetDialog;
 import cn.com.luckytry.interview.ui.widget.TitleItemDecoration;
-import cn.com.luckytry.interview.util.Const;
-import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
 public class StarActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -148,36 +139,36 @@ public class StarActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_main) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        }else if(id == R.id.nav_star){
-
-        }
-        else if (id == R.id.nav_change) {
-            int mode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            //切换主题
-            if(mode == Configuration.UI_MODE_NIGHT_YES) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                SharedPrefsUtil.putValue(MyApplication.getContext(), Const.THEME_MOUDLE,1);
-
-            } else if(mode == Configuration.UI_MODE_NIGHT_NO) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                SharedPrefsUtil.putValue(MyApplication.getContext(),Const.THEME_MOUDLE,2);
-
-            }
-            recreate();
-        } else if (id == R.id.nav_set) {
-            //设置
-            SetDialog dialog = new SetDialog(this);
-            dialog.builder().show();
-        } else if (id == R.id.nav_about) {
-            //关于
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent);
-
-        }
-        drawer.closeDrawer(GravityCompat.START);
+//        if (id == R.id.nav_main) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        }else if(id == R.id.nav_star){
+//
+//        }
+//        else if (id == R.id.nav_change) {
+//            int mode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+//            //切换主题
+//            if(mode == Configuration.UI_MODE_NIGHT_YES) {
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//                SharedPrefsUtil.putValue(MyApplication.getContext(), Const.THEME_MOUDLE,1);
+//
+//            } else if(mode == Configuration.UI_MODE_NIGHT_NO) {
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//                SharedPrefsUtil.putValue(MyApplication.getContext(),Const.THEME_MOUDLE,2);
+//
+//            }
+//            recreate();
+//        } else if (id == R.id.nav_set) {
+//            //设置
+//            SetDialog dialog = new SetDialog(this);
+//            dialog.builder().show();
+//        } else if (id == R.id.nav_about) {
+//            //关于
+//            Intent intent = new Intent(this, AboutActivity.class);
+//            startActivity(intent);
+//
+//        }
+//        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 }

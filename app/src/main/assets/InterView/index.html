@@ -6,7 +6,8 @@
 	<title>MarkDown文件加载</title>
 	<style>
 			body {
-				background-color: blueviolet;
+				background-color: #f0f0f0;
+				color: #333333;
 			}
 
 			* {
@@ -21,14 +22,40 @@
 <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="js/marked.js"></script>
 <script type="text/javascript" src="js/http.js"></script>
+<script src="js/WebViewJavascriptBridge.js"></script>
 
 <body>
 
 </body>
 <script>
+		function connectWebViewJavascriptBridge(callback) {
+			if(window.WebViewJavascriptBridge) {
+				callback(WebViewJavascriptBridge)
+			} else {
+				document.addEventListener(
+					'WebViewJavascriptBridgeReady',
+					function() {
+						callback(WebViewJavascriptBridge)
+					},
+					false
+				);
+			}
+		}
+		connectWebViewJavascriptBridge(function(bridge) {
+			bridge.init(function(message, responseCallback) {
+			});
+			bridge.registerHandler("theme", function(data, responseCallback) {
+				$("body").css("background-color","#444D55");
+				$("body").css("color","#ffffff");
+			});
+		});
+
+
+	</script>
+<script>
 
 		function loadData(url) {
-			alert(url);
+
 			var data1 = {
 				"url": url
 			};
@@ -120,7 +147,14 @@
 					} else {
 						$.get(result.download_url, function(response, status, xhr) {
 							$("body").html(marked(response));
+							window.WebViewJavascriptBridge.callHandler('resultText', "", function(responseData){
+								if(responseData != "1"){//夜间模式
 
+
+								}else{//已经默认日间模式
+
+								}
+							});
 
 						});
 					}

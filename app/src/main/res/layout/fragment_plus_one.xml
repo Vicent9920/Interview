@@ -2,8 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fff"
     android:orientation="vertical"
-    tools:context="cn.com.luckytry.interview.ui.main.fragment.FileGruopFragment">
+    tools:context=".PlusOneFragment">
 
     <RelativeLayout
         android:id="@+id/ll_rl_loading"
@@ -29,12 +30,14 @@
             android:text="正在拼命加载数据" />
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_gruops"
+    <Button
+        android:id="@+id/btn_test"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:text="测试"/>
 
-    </android.support.v7.widget.RecyclerView>
+
 
 </LinearLayout>

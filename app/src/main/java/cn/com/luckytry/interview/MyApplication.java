@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatDelegate;
 import org.litepal.LitePal;
 
 import cn.bmob.v3.Bmob;
+import cn.com.luckytry.interview.service.ParseDataService;
 import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.util.Const;
 import cn.com.luckytry.interview.util.SharedPrefsUtil;
@@ -34,7 +35,7 @@ public class MyApplication extends MultiDexApplication {
         }
         Bmob.initialize(this, "28c32139fc01c8e43864b82a76d4c6fb");
         startService(new Intent(this, SpeechService.class));
-//        startService(new Intent(this, ParseDataService.class));
+        startService(new Intent(this, ParseDataService.class));
     }
 
     public static Context getContext(){

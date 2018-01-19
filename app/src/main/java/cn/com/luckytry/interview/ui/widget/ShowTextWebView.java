@@ -70,13 +70,7 @@ public class ShowTextWebView extends BridgeWebView{
         baseUrl = url;
     }
 
-    @Override
-    public void loadUrl(String url) {
-        super.loadUrl(url);
 
-
-
-    }
 
     public void setOnChangeListener(OnChangeListener listener){
         this.changeListener = listener;

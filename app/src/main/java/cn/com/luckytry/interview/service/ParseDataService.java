@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.IBinder;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.litepal.crud.DataSupport;
+import org.litepal.crud.callback.SaveCallback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,10 +25,7 @@ import cn.bmob.v3.datatype.BatchResult;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.QueryListListener;
 import cn.com.luckytry.interview.bean.InterViewMoudle;
-import cn.com.luckytry.interview.util.Const;
-import cn.com.luckytry.interview.util.DataBaseHelper;
 import cn.com.luckytry.interview.util.LUtil;
-import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
 public class ParseDataService extends Service {
     private static final String TAG = "ParseDataService";
@@ -36,7 +36,14 @@ public class ParseDataService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        parseValue();
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                parseValue();
+            }
+        }.start();
+
     }
 
     /**
@@ -48,7 +55,7 @@ public class ParseDataService extends Service {
             //markdown_views
             Element elementOl = doc.select(".markdown_views").first().select("ol").first();//查找第一个a元素
             ArrayList<Element> elementLis = elementOl.children();
-            List<InterViewMoudle> moudles = new ArrayList<>();
+            final List<InterViewMoudle> moudles = new ArrayList<>();
             for (int i = 0; i < elementLis.size(); i++) {
                 Element item = elementLis.get(i);
                 String[] name = item.html().split("<br>");
@@ -59,12 +66,30 @@ public class ParseDataService extends Service {
                     interViewMoudle.setFileName(moudle.text());
                     String adress = moudle.child(0).attr("href");
                     interViewMoudle.setAdress(adress);
-                    interViewMoudle.setGroup(name[0]);
+                    String group = name[0].trim();
+                    interViewMoudle.setGroupName(group);
                     moudles.add(interViewMoudle);
                 }
             }
-            int size = SharedPrefsUtil.getValue(this, Const.DATABASE_KEY,0,false);
-            DataBaseHelper.updateDataBase(size,moudles);
+            int oldSize = DataSupport.findAll(InterViewMoudle.class).size();
+            if(oldSize == 0){
+                DataSupport.saveAllAsync(moudles).listen(new SaveCallback() {
+                    @Override
+                    public void onFinish(boolean success) {
+                        EventBus.getDefault().post(moudles.get(0));
+                        LUtil.e("数据添加完成：" + success);
+                    }
+                });
+            }else if(oldSize != moudles.size()){
+                DataSupport.deleteAll(InterViewMoudle.class);
+                DataSupport.saveAllAsync(moudles).listen(new SaveCallback() {
+                    @Override
+                    public void onFinish(boolean success) {
+                        LUtil.e("数据更新完成：" + success);
+                    }
+                });
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

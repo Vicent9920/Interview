@@ -15,8 +15,7 @@ public class InterViewMoudle extends DataSupport {
     /**
      * 组别
      */
-    @Column(unique = true)
-    private String group;
+    private String groupname;
     /**
      * 文章名称
      */
@@ -48,12 +47,12 @@ public class InterViewMoudle extends DataSupport {
         this.id = id;
     }
 
-    public String getGroup() {
-        return group;
+    public String getGroupName() {
+        return groupname;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setGroupName(String groupName) {
+        this.groupname = groupName;
     }
 
     public String getFileName() {

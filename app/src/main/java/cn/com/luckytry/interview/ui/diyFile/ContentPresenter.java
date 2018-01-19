@@ -7,31 +7,20 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
-import android.util.Log;
 import android.webkit.WebResourceError;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.litepal.crud.DataSupport;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cn.bmob.v3.BmobQuery;
-import cn.bmob.v3.BmobUser;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.QueryListener;
-import cn.bmob.v3.listener.UpdateListener;
 import cn.com.luckytry.interview.bean.Events;
-import cn.com.luckytry.interview.bean.InterViewInfo;
-import cn.com.luckytry.interview.bean.InterViewUser;
+import cn.com.luckytry.interview.bean.InterViewMoudle;
 import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.ui.BaseView;
 import cn.com.luckytry.interview.ui.parsehtml.WebFactory;
 import cn.com.luckytry.interview.ui.widget.ShowTextWebView;
 import cn.com.luckytry.interview.util.LUtil;
-
-import static cn.bmob.v3.BmobUser.getCurrentUser;
 
 /**
  * Created by 魏兴 on 2017/9/16.
@@ -40,18 +29,19 @@ import static cn.bmob.v3.BmobUser.getCurrentUser;
 public class ContentPresenter implements ContentContract.Presenter {
 
     private ContentContract.View mView;
-    private InterViewInfo mBean = null;
+    private InterViewMoudle mBean = null;
     private String mText;
-    private String url;
+//    private String url;
     private int playState = -1;
     private SpeechService mSpeechService;
     private Handler mHandler;
-    InterViewUser user = BmobUser.getCurrentUser(InterViewUser.class);
+
 
     @Override
     public void start() {
         EventBus.getDefault().register(this);
         mHandler = new Handler();
+        parpreSource();
     }
 
     @Override
@@ -68,7 +58,7 @@ public class ContentPresenter implements ContentContract.Presenter {
     @Override
     public void controlPlay() {
         if(playState == -1){//停止状态
-            mSpeechService.synthesizeToFile(mText,mBean.getObjectId());
+            mSpeechService.synthesizeToFile(mText);
             playState = 1;
         }else if(playState == 1){//播放状态
             mSpeechService.pausePayler();
@@ -83,7 +73,7 @@ public class ContentPresenter implements ContentContract.Presenter {
     public void copyLink() {
         ClipboardManager cm = (ClipboardManager) mView.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         // 创建普通字符型ClipData
-        ClipData mCliplLink = ClipData.newPlainText("Label", url);
+        ClipData mCliplLink = ClipData.newPlainText("Label", mBean.getAdress());
         // 将ClipData内容放到系统剪贴板里。
         cm.setPrimaryClip(mCliplLink);
     }
@@ -92,7 +82,7 @@ public class ContentPresenter implements ContentContract.Presenter {
         ClipboardManager cm = (ClipboardManager) mView.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
 
         // 创建普通字符型ClipData
-        ClipData mClipData = ClipData.newPlainText("Label", mBean.getFile_Content());
+        ClipData mClipData = ClipData.newPlainText("Label", mBean.getText());
         // 将ClipData内容放到系统剪贴板里。
         cm.setPrimaryClip(mClipData);
     }
@@ -112,7 +102,7 @@ public class ContentPresenter implements ContentContract.Presenter {
 
         share_intent.putExtra(Intent.EXTRA_SUBJECT, "面试宝典");
 
-        share_intent.putExtra(Intent.EXTRA_TEXT, name+url+"分享自面试宝典·Android" );
+        share_intent.putExtra(Intent.EXTRA_TEXT, name+mBean.getAdress()+"分享自面试宝典·Android" );
 
         share_intent = Intent.createChooser(share_intent, "分享");
 
@@ -126,17 +116,7 @@ public class ContentPresenter implements ContentContract.Presenter {
 
     @Override
     public boolean isStar() {
-        List<String> starData = user.getStars();
-        if(starData.size() == 0){
-            return false;
-        }
-
-        for (int i = 0; i < starData.size(); i++) {
-            if(starData.get(i).equals(mBean.getObjectId())){
-                return true;
-            }
-        }
-       return false;
+       return mBean.isStar();
     }
 
     @Override
@@ -146,33 +126,14 @@ public class ContentPresenter implements ContentContract.Presenter {
 
     @Override
     public void sendNotification(String tag, String name) {
-        mSpeechService.setNotification(url,tag,name);
+        mSpeechService.setNotification(mBean.getAdress(),tag,name);
     }
 
     @Override
     public boolean addStar() {
-        ArrayList<String> starData = user.getStars();
-
-        final boolean state = isStar();
-        if(state){
-            for (int i = 0; i < starData.size(); i++) {
-                if(starData.get(i).equals(mBean.getObjectId())){
-                    starData.remove(i);
-                    break;
-                }
-            }
-        }else{
-            starData.add(mBean.getObjectId());
-        }
-        user.setReaded(starData);
-        user.update(new UpdateListener() {
-            @Override
-            public void done(BmobException e) {
-                LUtil.e("修改收藏结束："+!state);
-            }
-        });
-
-        return state;
+        mBean.setStar(!mBean.isStar());
+        mBean.save();
+        return mBean.isStar();
 
     }
 
@@ -180,7 +141,7 @@ public class ContentPresenter implements ContentContract.Presenter {
     public void openByBrowser() {
         Intent intent = new Intent();
         intent.setAction("android.intent.action.VIEW");
-        Uri content_url = Uri.parse(url);
+        Uri content_url = Uri.parse(mBean.getAdress());
         intent.setData(content_url);
         mView.getContext().startActivity(intent);
     }
@@ -207,48 +168,18 @@ public class ContentPresenter implements ContentContract.Presenter {
 
 
     @Override
-    public InterViewInfo getmBean(String id) {
-        this.url = id;
-//        List<InterviewBean> beans = DataSupport.where("adress = ?", url).find(InterviewBean.class);
-//        if(beans.size()>0){
-//
-//             mBean = beans.get(0);
-//
-//            if(mBean.isValidContent()){
-//                String source = Const.getData(mView.getContext(),mBean.getContent());
-//                mView.showSource(source);
-//
-//            }else{
-//
+    public void getmBean(String id) {
+        LUtil.e(id);
+        mBean = DataSupport.where("fileName = ?", id).find(InterViewMoudle.class).get(0);
 
-//            }
-//        }
-
-        BmobQuery<InterViewInfo> query = new BmobQuery<InterViewInfo>();
-        query.getObject(id, new QueryListener<InterViewInfo>() {
-
-            @Override
-            public void done(InterViewInfo object, BmobException e) {
-                if(e==null){
-                    mBean = object;
-                    parpreSource();
-                    //获得createdAt数据创建时间（注意是：createdAt，不是createAt）
-                    //object.getCreatedAt();
-                }else{
-                    Log.i("bmob","失败："+e.getMessage()+","+e.getErrorCode());
-                }
-            }
-
-        });
-        return mBean;
     }
 
     /**
      * 加载资源
      */
     public void parpreSource() {
-
-        new Thread(new ApiRunnable(mBean.getFile_Link())).start();
+        LUtil.e("加载资源"+mBean.getAdress());
+        new Thread(new ApiRunnable(mBean.getAdress())).start();
     }
 
     @Override
@@ -282,51 +213,12 @@ public class ContentPresenter implements ContentContract.Presenter {
         }
         @Override
         public void run() {
-//                Document doc = Jsoup.connect(url).get();
-//                final String html ;
-//
-//                if(url.startsWith("http://www.jianshu.com")){
-////                    html = doc.getElementsByClass("content").html();
-//                    html = doc.select("div.show-content").first().html();
-//                    mText = doc.select("div.show-content").first().text();
-//                }else if(url.startsWith("https://github.com/")){
-//                    html = doc.getElementsByTag("article").html();
-//                    mText = doc.getElementsByTag("article").text();
-//                }else if(url.startsWith("http://p.codekk.com/blogs")){
-//                    html = doc.select("div.hero-unit").first().html();
-//                    mText = doc.select("div.hero-unit").first().text();
-//                }else{
-//                    html = "";
-//                }
+
 
                 mText = WebFactory.getWebData(url).getText();
-//               mHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        String source = Const.getData(mView.getContext(),html);
-//                        mView.showSource(source);
-//                    }
-//                });
-                mBean.setFile_Content(mText);
-                mBean.update(new UpdateListener() {
-                    @Override
-                    public void done(BmobException e) {
-
-                    }
-                });
-                InterViewUser user = getCurrentUser(InterViewUser.class);
-                user.getReaded().add(mBean.getObjectId());
-                LUtil.e("已读数量："+user.getReaded().size());
-                user.update(new UpdateListener() {
-                    @Override
-                    public void done(BmobException e) {
-                        if(e==null){
-                            LUtil.e("完成添加");
-                        }else{
-                            LUtil.e(e.getMessage());
-                        }
-                    }
-                });
+                mBean.setText(mText);
+                mBean.setRead(true);
+                mBean.saveAsync();
 
         }
     }

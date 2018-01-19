@@ -36,7 +36,7 @@ public class MyAdapter extends CommonAdapter<InterViewInfo> {
 
     @Override
     protected void convert(ViewHolder holder, final InterViewInfo interviewBean, int position) {
-        holder.setText(R.id.tvInterview, interviewBean.getName());
+        holder.setText(R.id.tv_Interview, interviewBean.getName());
         holder.getConvertView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

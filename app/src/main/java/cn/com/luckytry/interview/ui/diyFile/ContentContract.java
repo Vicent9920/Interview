@@ -1,6 +1,5 @@
 package cn.com.luckytry.interview.ui.diyFile;
 
-import cn.com.luckytry.interview.bean.InterViewInfo;
 import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.ui.BasePresenter;
 import cn.com.luckytry.interview.ui.BaseView;
@@ -37,7 +36,7 @@ public interface ContentContract {
         boolean isOnLoad();
         void sendNotification(String tag, String name);
         ShowTextWebView.OnChangeListener getOnChangeListener();
-        InterViewInfo getmBean(String url);
+        void getmBean(String url);
         ContentPresenter.AppBarStateChangeListener getAppBarStateChangeListener();
     }
 }

@@ -17,7 +17,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,12 +28,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import cn.com.luckytry.interview.MyApplication;
 import cn.com.luckytry.interview.R;
+import cn.com.luckytry.interview.jsbridge.BridgeHandler;
+import cn.com.luckytry.interview.jsbridge.CallBackFunction;
 import cn.com.luckytry.interview.service.SpeechService;
 import cn.com.luckytry.interview.ui.widget.Kawaii_LoadingView;
 import cn.com.luckytry.interview.ui.widget.ShowTextWebView;
+import cn.com.luckytry.interview.util.Const;
+import cn.com.luckytry.interview.util.SharedPrefsUtil;
 
-public class ContentActivity extends AppCompatActivity implements View.OnClickListener,ContentContract.View {
+public class ContentActivity extends AppCompatActivity implements View.OnClickListener,ContentContract.View, BridgeHandler {
 
     private static final String TAG = "ContentActivity";
     private ShowTextWebView mWebView;
@@ -43,7 +47,6 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 
     private CollapsingToolbarLayout mToolbarLayout;
 
-    private boolean isRefresh = false;
     private Handler mHandler;
     public String tag;
     public String name;
@@ -58,13 +61,15 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
-        mPresenter = new ContentPresenter();
-        mPresenter.setView(this);
 
-        mHandler = new Handler();
-        initViews();
         tag = getIntent().getStringExtra("tag");
         name = getIntent().getStringExtra("name");
+
+        mPresenter = new ContentPresenter();
+        mPresenter.setView(this);
+        mHandler = new Handler();
+        initViews();
+
         setCollapsingToolbarLayoutTitle(name);
         toast = Toast.makeText(this,"",Toast.LENGTH_SHORT);
         bindService(new Intent(this,SpeechService.class),mServiceConnection, Context.BIND_AUTO_CREATE);
@@ -119,6 +124,10 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
 //        EventBus.getDefault().register(this);
         mPresenter.start();
         mLoadingView.startMoving();
+        int mode = SharedPrefsUtil.getValue(MyApplication.getContext(), Const.THEME_MOUDLE,1,false);
+        if(mode!=1){
+            mWebView.callHandler("theme","",null);
+        }
     }
 
     private ImageView ivStar;
@@ -142,7 +151,6 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        Log.i("BottomSheet","onStateChanged");
                         mBottomSheetDialog.dismiss();
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                     }
@@ -245,9 +253,9 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         switch (tag){
             case "star":
                 boolean state = mPresenter.addStar();
-                String info = "已添加到收藏";
+                String info = "已从收藏中删除";
                 if(state){
-                    info = "已从收藏中删除";
+                    info = "已添加到收藏";
                 }
                 Snackbar.make(mWebView,info,Snackbar.LENGTH_SHORT).show();
                 break;
@@ -301,10 +309,9 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
         mToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         mWebView = (ShowTextWebView) findViewById(R.id.web_view);
         mWebView.setScrollbarFadingEnabled(true);
+        mWebView.setDefaultHandler(this);
         mLoadingView = (Kawaii_LoadingView) findViewById(R.id.Kawaii_LoadingView);
-
-        String url = getIntent().getStringExtra("Id");
-        mPresenter.getmBean(url);
+        mPresenter.getmBean(name);
 
         mWebView.setOnChangeListener(mPresenter.getOnChangeListener());
 
@@ -345,18 +352,19 @@ public class ContentActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void showSource(String source) {
 
-//        mWebView.loadDataWithBaseURL(null, source, "text/html", "utf-8",null);
-//        mWebView.loadUrl(source);
         mWebView.loadingUrl(source);
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-
-        mWebView.setVisibility(View.VISIBLE);
-
-        mLoadingView.setVisibility(View.GONE);
-        isRefresh = false;
-
     }
 
 
+    @Override
+    public void handler(String name, String data, CallBackFunction function) {
+        switch (name){
+            case "resultText":
+                mWebView.setVisibility(View.VISIBLE);
+                mLoadingView.setVisibility(View.GONE);
+                break;
+        }
 
+    }
 }

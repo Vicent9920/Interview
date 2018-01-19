@@ -1,160 +1,143 @@
-<!DOCTYPE html>
-<html>
+//notation: js file can only use this kind of comments
+//since comments will cause error when use in webview.loadurl,
+//comments will be remove by java use regexp
+(function() {
+    if (window.WebViewJavascriptBridge) {
+        return;
+    }
 
-	<head>
-		<meta charset="utf-8" />
-		<title>MarkDown文件加载</title>
-		<style>
-			body {
-				background-color: blueviolet;
-			}
-			
-			* {
-				max-width: 100vw;
-				text-overflow: ellipsis;
-				overflow: hidden;
-			}
-			
-			;
-		</style>
-	</head>
-	<script src="js/jquery-3.2.1.min.js"></script>
-	<script src="js/marked.js"></script>
-	<script src="js/http.js"></script>
-	<script src="js/WebViewJavascriptBridge.js"></script>
+    var messagingIframe;
+    var sendMessageQueue = [];
+    var receiveMessageQueue = [];
+    var messageHandlers = {};
 
-	<body>
+    var CUSTOM_PROTOCOL_SCHEME = 'yy';
+    var QUEUE_HAS_MESSAGE = '__QUEUE_MESSAGE__/';
 
-	</body>
-	<script>
-		function loadData(url) {
-			var data1 = {
-				"url": url
-			};
-			var data2 = {
-				"isProcessing": {
-					"val": false
-				},
-				"downloadedFiles": {
-					"val": 0
-				},
-				"totalFiles": {
-					"val": 0
-				}
-			};
-			var data3 = {};
-			downloadZippedFiles(data1, data2, data3);
-		}
+    var responseCallbacks = {};
+    var uniqueId = 1;
 
-		function GetUrlRelativePath(path)　　 {　　　　
+    function _createQueueReadyIframe(doc) {
+        messagingIframe = doc.createElement('iframe');
+        messagingIframe.style.display = 'none';
+        doc.documentElement.appendChild(messagingIframe);
+    }
 
-			var arrUrl = path.split("//");
+    //set default messageHandler
+    function init(messageHandler) {
+        if (WebViewJavascriptBridge._messageHandler) {
+            throw new Error('WebViewJavascriptBridge.init called twice');
+        }
+        WebViewJavascriptBridge._messageHandler = messageHandler;
+        var receivedMessages = receiveMessageQueue;
+        receiveMessageQueue = null;
+        for (var i = 0; i < receivedMessages.length; i++) {
+            _dispatchMessageFromNative(receivedMessages[i]);
+        }
+    }
 
-			　　　　
-			var start = arrUrl[1].indexOf("/");　　　　
-			var relUrl = arrUrl[1].substring(start); //stop省略，截取从start开始到结尾的所有字符
+    function send(data, responseCallback) {
+        _doSend({
+            data: data
+        }, responseCallback);
+    }
 
-			　　　　
-			if(relUrl.indexOf("?") != -1) {　　　　　　
-				relUrl = relUrl.split("?")[0];　　　　
-			}　　　　
-			return relUrl;　　
-		}
+    function registerHandler(handlerName, handler) {
+        messageHandlers[handlerName] = handler;
+    }
 
-		function parseInfo(parameters) {
+    function callHandler(handlerName, data, responseCallback) {
+        _doSend({
+            handlerName: handlerName,
+            data: data
+        }, responseCallback);
+    }
 
-			//			var repoPath = new URL(parameters.url).pathname;
-			var repoPath = GetUrlRelativePath(parameters.url);
-			console.log("repoPath：" + repoPath);
+    //sendMessage add message, 触发native处理 sendMessage
+    function _doSend(message, responseCallback) {
+        if (responseCallback) {
+            var callbackId = 'cb_' + (uniqueId++) + '_' + new Date().getTime();
+            responseCallbacks[callbackId] = responseCallback;
+            message.callbackId = callbackId;
+        }
 
-			var splitPath = repoPath.split("/");
-			console.log("splitPath：" + splitPath);
+        sendMessageQueue.push(message);
+        messagingIframe.src = CUSTOM_PROTOCOL_SCHEME + '://' + QUEUE_HAS_MESSAGE;
 
-			var info = {};
+    }
 
-			info.author = splitPath[1];
-			info.repository = splitPath[2];
-			info.branch = splitPath[4];
-			info.rootName = splitPath[splitPath.length - 1];
+    // 提供给native调用,该函数作用:获取sendMessageQueue返回给native,由于android不能直接获取返回的内容,所以使用url shouldOverrideUrlLoading 的方式返回内容
+    function _fetchQueue() {
+        var messageQueueString = JSON.stringify(sendMessageQueue);
+        sendMessageQueue = [];
+        //android can't read directly the return data, so we can reload iframe src to communicate with java
+        messagingIframe.src = CUSTOM_PROTOCOL_SCHEME + '://return/_fetchQueue/' + encodeURIComponent(messageQueueString);
+    }
 
-			if(!!splitPath[4]) {
-				info.resPath = repoPath.substring(
-					repoPath.indexOf(splitPath[4]) + splitPath[4].length + 1);
-			}
+    //提供给native使用,
+    function _dispatchMessageFromNative(messageJSON) {
+        setTimeout(function() {
+            var message = JSON.parse(messageJSON);
+            var responseCallback;
+            //java call finished, now need to call js callback function
+            if (message.responseId) {
+                responseCallback = responseCallbacks[message.responseId];
+                if (!responseCallback) {
+                    return;
+                }
+                responseCallback(message.responseData);
+                delete responseCallbacks[message.responseId];
+            } else {
+                //直接发送
+                if (message.callbackId) {
+                    var callbackResponseId = message.callbackId;
+                    responseCallback = function(responseData) {
+                        _doSend({
+                            responseId: callbackResponseId,
+                            responseData: responseData
+                        });
+                    };
+                }
 
-			info.urlPrefix = "https://api.github.com/repos/" + info.author +
-				"/" + info.repository + "/contents/";
-			info.urlPostfix = "?ref=" + info.branch;
-			if(!parameters.fileName || parameters.fileName == "") {
-				info.downloadFileName = info.rootName;
-			} else {
-				info.downloadFileName = parameters.fileName;
-			}
-			if(parameters.rootDirectory == "false") {
-				info.rootDirectoryName = "";
-			} else if(!parameters.rootDirectory || parameters.rootDirectory == "" ||
-				parameters.rootDirectory == "true") {
-				info.rootDirectoryName = info.rootName + "/";
-			} else {
-				info.rootDirectoryName = parameters.rootDirectory + "/";
-			}
-			console.log(JSON.stringify(info));
-			return info;
-		}
+                var handler = WebViewJavascriptBridge._messageHandler;
+                if (message.handlerName) {
+                    handler = messageHandlers[message.handlerName];
+                }
+                //查找指定handler
+                try {
+                    handler(message.data, responseCallback);
+                } catch (exception) {
+                    if (typeof console != 'undefined') {
+                        console.log("WebViewJavascriptBridge: WARNING: javascript handler threw.", message, exception);
+                    }
+                }
+            }
+        });
+    }
 
-		function downloadZippedFiles(parameters, progress, toastr) {
-			var repoInfo = parseInfo(parameters);
-			if(!repoInfo.resPath || repoInfo.resPath == "") {
-				if(!repoInfo.branch || repoInfo.branch == "") {
-					repoInfo.branch = "master";
-				}
-				var downloadUrl = "https://github.com/" + repoInfo.author + "/" +
-					repoInfo.repository + "/archive/" + repoInfo.branch + ".zip";
-				window.location = downloadUrl;
-			} else {
-				//普通get请求
-				http.get(repoInfo.urlPrefix + repoInfo.resPath + repoInfo.urlPostfix, function(err, result) {
-						if(err) {
-							console.log(JSON.stringify(err));
-						} else {
-							$.get(result.download_url, function(response, status, xhr) {
-									$("body").html(marked(response));
-									var data = $('body').text();
-									resultData(data);
-								);
-							});
-					}
-				});
+    //提供给native调用,receiveMessageQueue 在会在页面加载完后赋值为null,所以
+    function _handleMessageFromNative(messageJSON) {
+        console.log(messageJSON);
+        if (receiveMessageQueue && receiveMessageQueue.length > 0) {
+            receiveMessageQueue.push(messageJSON);
+        } else {
+            _dispatchMessageFromNative(messageJSON);
+        }
+    }
 
-		}
-		}
-	</script>
-	<script>
-		function connectWebViewJavascriptBridge(callback) {
-			if(window.WebViewJavascriptBridge) {
-				callback(WebViewJavascriptBridge)
-			} else {
-				document.addEventListener(
-					'WebViewJavascriptBridgeReady',
-					function() {
-						callback(WebViewJavascriptBridge)
-					},
-					false
-				);
-			}
-		}
-		connectWebViewJavascriptBridge(function(bridge) {
-			bridge.init(function(message, responseCallback) {
+    var WebViewJavascriptBridge = window.WebViewJavascriptBridge = {
+        init: init,
+        send: send,
+        registerHandler: registerHandler,
+        callHandler: callHandler,
+        _fetchQueue: _fetchQueue,
+        _handleMessageFromNative: _handleMessageFromNative
+    };
 
-			});
-
-		});
-
-		function resultData(data) {
-			window.WebViewJavascriptBridge.callHandler('resultText', data, function(responseData) {
-
-				}
-			}
-	</script>
-
-</html>
+    var doc = document;
+    _createQueueReadyIframe(doc);
+    var readyEvent = doc.createEvent('Events');
+    readyEvent.initEvent('WebViewJavascriptBridgeReady');
+    readyEvent.bridge = WebViewJavascriptBridge;
+    doc.dispatchEvent(readyEvent);
+})();
